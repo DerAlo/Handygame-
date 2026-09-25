@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Blubberei</title>
+  <meta name="description" content="Blubberei – ein entspanntes Merge-Spiel für zwischendurch. Lass gleiche Blubbs verschmelzen und erschaffe König Blubb!">
+  <meta name="theme-color" content="#ffd9ec">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="Blubberei">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta property="og:title" content="Blubberei">
+  <meta property="og:description" content="Entspanntes Merge-Spiel für zwischendurch – direkt im Browser.">
+  <meta property="og:image" content="icons/icon-512.png">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <canvas id="cv"></canvas>
+
+  <header id="hud">
+    <button id="btnPause" class="icon-btn" aria-label="Pause">
+      <svg viewBox="0 0 24 24" width="22" height="22"><rect x="6" y="5" width="4" height="14" rx="2"/><rect x="14" y="5" width="4" height="14" rx="2"/></svg>
+    </button>
+    <div class="score-box">
+      <div id="score">0</div>
+      <div class="best">Rekord <span id="best">0</span></div>
+    </div>
+    <div class="next-box" aria-label="Nächster Blubb">
+      <span>danach</span>
+      <img id="nextImg" alt="">
+    </div>
+  </header>
+
+  <footer id="chain" aria-label="Blubb-Sammlung"></footer>
+  <div id="toast" aria-live="polite"></div>
+
+  <!-- Startbildschirm -->
+  <section id="scrTitle" class="screen show">
+    <div class="title-card">
+      <h1 class="logo"><span>Blubb</span><span>erei</span></h1>
+      <p class="tag">Lass gleiche Blubbs zusammenstoßen –<br>sie verschmelzen zum nächstgrößeren.</p>
+      <button id="btnResume" class="btn big hidden">Weiterspielen</button>
+      <button id="btnPlay" class="btn big">Spielen</button>
+      <div class="best-title">Rekord: <b id="bestTitle">0</b></div>
+      <div class="toggles">
+        <button class="toggle" data-set="sfx" aria-pressed="true">🔊 Sound</button>
+        <button class="toggle" data-set="music" aria-pressed="true">🎵 Musik</button>
+        <button class="toggle" data-set="vibe" aria-pressed="true">📳 Vibration</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="scrPause" class="screen">
+    <div class="card">
+      <h2>Pause</h2>
+      <button id="btnContinue" class="btn big">Weiter</button>
+      <button id="btnRestart" class="btn">Neues Spiel</button>
+      <div class="toggles">
+        <button class="toggle" data-set="sfx" aria-pressed="true">🔊 Sound</button>
+        <button class="toggle" data-set="music" aria-pressed="true">🎵 Musik</button>
+        <button class="toggle" data-set="vibe" aria-pressed="true">📳 Vibration</button>
+      </div>
+      <details class="howto">
+        <summary>So geht's</summary>
+        <ul>
+          <li>Finger auf den Bildschirm, zielen, loslassen – der Blubb fällt ins Glas.</li>
+          <li>Zwei gleiche Blubbs verschmelzen zum nächstgrößeren.</li>
+          <li>Kettenreaktionen geben Kombo-Punkte.</li>
+          <li>Bleibt ein Blubb zu lange über der gestrichelten Linie, ist das Glas voll.</li>
+          <li>Zwei Könige? Die verschwinden mit einem Riesenbonus!</li>
+        </ul>
+      </details>
+      <button id="btnMenu" class="btn ghost">Zum Startbildschirm</button>
+    </div>
+  </section>
+
+  <!-- Game Over -->
+  <section id="scrOver" class="screen">
+    <div class="card">
+      <h2>Glas voll!</h2>
+      <div id="newRecord" class="badge hidden">🏆 Neuer Rekord!</div>
+      <div class="final"><span id="finalScore">0</span><small>Punkte</small></div>
+      <div class="biggest"><img id="biggestImg" alt=""><span>Größter Blubb:<br><b id="biggestName"></b></span></div>
+      <button id="btnRescue" class="btn big rescue">
+        <span>Glas retten &amp; weiter</span>
+        <small id="rescueHint">obere Blubbs platzen · 1× pro Runde</small>
+      </button>
+      <button id="btnAgain" class="btn big">Nochmal</button>
+      <button id="btnMenu2" class="btn ghost">Zum Startbildschirm</button>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
