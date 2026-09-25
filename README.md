@@ -106,3 +106,13 @@ Ein Point-&-Click-Adventure im Geist der LucasArts-Klassiker – aber heute, in 
 - `quantensalat/js/art.js`, `sprites.js` – Pixel-Art-Hintergründe, Figuren (mit Laufanimation, Lippenbewegung, Blinzeln) und Gegenstände, alles per Code
 - `quantensalat/js/audio.js` – Chiptune-Musik pro Ort und Soundeffekte (inkl. Morsezeichen)
 - Später Werbung: Der 💡-Tipp-Knopf bietet sich als Belohnungs-Video an („Tipp gegen Werbung“)
+
+## Kapitel 2: Der Unwahrscheinlichkeitssturm
+
+Drei Wochen später: Kai ist Doktorand – und in Wasserburg passieren unmögliche Dinge. Der Inn fließt rückwärts, die Tauben gurren auf Latein, und der Kaffeeautomat **funktioniert**. Glanz’ Superposition hat sich in zwei Richtungen aufgelöst: Der gute „Glanzi“ wischt glücklich Mehmets Kebabstand, der böse betreibt irgendwo eine nachgebaute **Q-Box Pro Max**.
+
+- **Fuchsjagd:** Kai baut eine echte Maßband-Yagi (aus dem Besenstiel seines alten Mopps), lädt das Handfunkgerät an KARL (nach einer Autowäsche mit rückwärts fließendem Innwasser) und peilt den Störsender von zwei Orten an. Der Kreuzungspunkt auf dem Stadtplan verrät das Versteck.
+- **Neue Schauplätze:** Burghof und Serverraum im Burgturm.
+- **Peer-Review-Duell 2.0:** acht neue Denkfehler (Strohmann, Whataboutism, Anekdote, Naturalistischer Fehlschluss, Survivorship Bias, Spielerfehlschluss, Falsches Dilemma, Torpfosten verschieben). Trainer: Glanzi – er kennt alle Tricks seines Zwillings.
+- **Neue Mechanik:** Manche Gegenstände benutzt man direkt (antippen → „▶“), z. B. den Peilempfänger.
+- Code: `quantensalat/js/story2.js`

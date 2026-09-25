@@ -1,8 +1,9 @@
 // QUANTENSALAT – Das Wasserburg-Paradoxon
 // Story, Szenen, Rätsel und Dialoge.
 import { audio } from './audio.js';
+import { drawCounter } from './art.js';
 import { trainingDuel, finalDuel, RETORTS } from './duel.js';
-import { drawCat } from './sprites.js';
+import { chapter2, newState2, combine2, itemUse2, itemLook2, hint2 } from './story2.js';
 
 const C = { kai: '#ffffff', prof: '#d7b4ff', mehmet: '#ffc864', glanz: '#7fe3ff', guard: '#ff9f9f', karl: '#9dff9d', radio: '#ffe89a' };
 
@@ -321,7 +322,7 @@ export const scenes = {
     walk: [8, 154, 312, 192],
     entries: { institut: [18, 174, 1], platz: [258, 166, -1] },
     actors: () => [
-      { id: 'mehmet', who: 'mehmet', x: 80, y: 146, dir: 1, fixedDir: true, color: C.mehmet, pitch: 0.8 },
+      { id: 'mehmet', who: 'mehmet', x: 80, y: 146, dir: 1, fixedDir: true, color: C.mehmet, pitch: 0.8, after: drawCounter },
     ],
     hotspots: [
       { id: 'zumInstitut', name: 'Zum Institut', rect: [0, 140, 14, 60], at: [10, 174], exit: ['flur', 'ausgang'] },
@@ -774,6 +775,7 @@ async function finale(E) {
 // ---------- Kombinationen ----------
 const DIS = ['kittel', 'brille', 'moppkopf'];
 export function combine(E, a, b) {
+  if (E.S.ch === 2) return combine2(E, a, b);
   const pair = [a, b].sort().join('+');
   if (pair === 'handy+stativ') {
     E.removeItem('handy'); E.removeItem('stativ'); E.addItem('handystativ');
@@ -804,6 +806,7 @@ export function combine(E, a, b) {
 }
 
 export function itemLook(E, id) {
+  if (E.S.ch === 2) return itemLook2(E, id);
   if (id === 'verkleidungTeil') {
     const have = E.F.dparts || [];
     const miss = DIS.filter((d) => !have.includes(d)).map((d) => ({ kittel: 'ein Kittel', brille: 'eine Brille', moppkopf: 'graue Haare' })[d]);
@@ -816,6 +819,7 @@ export function itemLook(E, id) {
 
 // ---------- Tipps ----------
 export function hint(E) {
+  if (E.S.ch === 2) return hint2(E);
   const F = E.F, S = E.S;
   if (!F.sawProf) return 'Im Labor hat es geknallt. Schau nach, was dort los ist!';
   if (F.won && !F.profBack) return 'Benutze die Q-Box mit der Frau Professor.';
@@ -843,4 +847,22 @@ export function hint(E) {
     return n.length ? `Für die Verkleidung als Professorin brauchst du noch: ${n.join(', ')}.` : 'Kombiniere Kittel, Brille und Moppkopf im Inventar zur Verkleidung.';
   }
   return 'Geh zum Rathausplatz und benutze die Einladung mit dem Security-Mann.';
+}
+
+// ---------- Kapitel & Zustand ----------
+Object.assign(scenes, chapter2(scenes));
+
+export function newState(ch = 1) {
+  if (ch === 2) return newState2();
+  return { ch: 1, scene: 'flur', inv: ['mopp', 'handy'], flags: {}, learned: [], kai: { x: 90, y: 172, dir: 1 }, v: 1 };
+}
+
+export function kaiSprite(S) {
+  if (S.flags.disguised) return 'kaiDisguise';
+  return S.ch === 2 ? 'kaiPhd' : 'kai';
+}
+
+export function itemUse(E, id) {
+  if (E.S.ch === 2) return itemUse2(E, id);
+  return null;
 }

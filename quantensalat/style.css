@@ -117,6 +117,8 @@ html, body {
 #bar button:active { transform: translateY(1px); }
 #bar .sel-only { display: none; }
 body.itemsel #bar .sel-only { display: block; }
+body.itemsel #bar .sel-only.hidden { display: none !important; }
+#bar button.use { width: auto; padding: 0 12px; font: 800 15px var(--font); background: linear-gradient(#ffd35a, #f0a820); color: #2a1a00; }
 body.itemsel #status { flex: 1; }
 
 #inv {
@@ -219,3 +221,6 @@ h2 { margin: 0 0 10px; }
 .rot, .small { font-size: 13px; color: var(--soft); margin: 12px 0 0; }
 .credits { font-size: 13px; line-height: 1.6; color: var(--soft); margin: 10px 0 6px; }
 .credits b { color: var(--ink); }
+
+.btn.ch2 { background: linear-gradient(#ff9ad0, #e0508a); color: #2a0014; box-shadow: 0 4px 0 #8a2050; font-size: 17px; }
+.btn.ch2 small { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: #2a0014; color: #ffd35a; font-size: 11px; vertical-align: middle; }

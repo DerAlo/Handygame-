@@ -30,9 +30,7 @@ export class Engine {
   }
 
   // ---------- Zustand ----------
-  newState() {
-    return { scene: 'flur', inv: ['mopp', 'handy'], flags: {}, learned: [], kai: { x: 90, y: 172, dir: 1 }, v: 1 };
-  }
+  newState(ch = 1) { return this.story.newState(ch); }
   save() {
     if (!this.S || this.S.flags.ended) return;
     try { localStorage.setItem(SAVE_KEY, JSON.stringify(this.S)); } catch {}
@@ -73,7 +71,7 @@ export class Engine {
       const e = sc.entries[entry];
       Object.assign(this.S.kai, { x: e[0], y: e[1], dir: e[2] || 1 });
     }
-    this.kai = { id: 'kai', who: this.S.flags.disguised ? 'kaiDisguise' : 'kai', x: this.S.kai.x, y: this.S.kai.y, dir: this.S.kai.dir, color: '#ffffff', phase: 0 };
+    this.kai = { id: 'kai', who: this.story.kaiSprite(this.S), x: this.S.kai.x, y: this.S.kai.y, dir: this.S.kai.dir, color: '#ffffff', phase: 0 };
     this.actors = { kai: this.kai };
     for (const a of sc.actors?.(this.S) || []) this.actors[a.id] = Object.assign({ dir: -1, phase: 0 }, a);
     audio.play(sc.music);
@@ -288,6 +286,9 @@ export class Engine {
     const st = $('status');
     if (id) st.innerHTML = `Benutze <b>${ITEMS[id].name}</b> mit …`;
     else st.textContent = '';
+    const bu = $('btnUse');
+    bu.classList.toggle('hidden', !(id && ITEMS[id].self));
+    if (id && ITEMS[id].self) bu.textContent = '▶ ' + ITEMS[id].self;
     document.body.classList.toggle('itemsel', !!id);
   }
 
@@ -389,6 +390,18 @@ export class Engine {
       });
     });
     $('btnCancel').addEventListener('click', (e) => { e.stopPropagation(); this.select(null); });
+    $('btnUse').addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (!this.selected || this.busy) return;
+      const id = this.selected;
+      this.select(null);
+      audio.blip();
+      this.run(async () => {
+        const r = this.story.itemUse?.(this, id);
+        if (r && typeof r.then === 'function') await r;
+        else await this.say('kai', r || 'Damit kann ich allein nichts anfangen.');
+      });
+    });
   }
 
   view() {
@@ -451,7 +464,7 @@ export class Engine {
   render() {
     const ctx = this.ctx;
     if (!this.S) return;
-    const id = this.S.scene;
+    const id = this.scene().art || this.S.scene;
     ctx.globalAlpha = 1;
     ctx.fillStyle = '#000';
     ctx.fillRect(0, 0, W, H);
@@ -467,6 +480,7 @@ export class Engine {
       const jx = a.glitch ? (Math.random() < 0.15 ? Math.round((Math.random() - 0.5) * 6) : 0) : 0;
       drawPerson(ctx, a.x + jx, a.y, { who: a.who, dir: a.dir, walking: a.walking, phase: a.phase, talking: a.talking, t: this.t, blink: a.blinkT < 0, pose: a.pose, noLegs: a.noLegs });
       if (a.carry) drawQBox(ctx, a.x + a.dir * 9, a.y - 16, this.t, false);
+      if (a.after) a.after(ctx, this.t);
       ctx.restore();
     }
     FG[id]?.(ctx, this.t);

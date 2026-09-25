@@ -15,6 +15,9 @@ export const CHARS = {
   prof: { skin: '#f3cba8', skinD: '#c9987a', hair: '#e8e8ee', hairL: '#ffffff', shirt: '#8a4a7a', body: '#f4f4f8', bodyD: '#c8c8d8', legs: '#4a3a5a', legsD: '#35283f', shoe: '#2a1a1a', style: 'bun', coat: true, glasses: true, h: 38 },
   glanz: { skin: '#f2c6a0', skinD: '#c9947a', hair: '#e8c860', hairL: '#fff0a0', shirt: '#ffffff', body: '#c8b08a', bodyD: '#a08a68', legs: '#2d4a7a', legsD: '#223a60', shoe: '#f4f4f4', style: 'slick', vest: true, h: 44 },
   guard: { skin: '#b07a52', skinD: '#8a5a3a', hair: '#1a1a1a', hairL: '#333', shirt: '#ffffff', body: '#1e1e28', bodyD: '#12121a', legs: '#1e1e28', legsD: '#12121a', shoe: '#0a0a0a', style: 'buzz', suit: true, earpiece: true, wide: 2, h: 46 },
+  kaiPhd: { skin: '#f0c09a', skinD: '#c98f6c', hair: '#5a3a22', hairL: '#7c5634', shirt: '#6aa0d0', body: '#f4f4f8', bodyD: '#c8c8d8', legs: '#3a6ea8', legsD: '#29507c', shoe: '#3a2a20', style: 'messy', coat: true, h: 42 },
+  glanzi: { skin: '#f2c6a0', skinD: '#c9947a', hair: '#e8c860', hairL: '#fff0a0', shirt: '#ffffff', body: '#ffffff', bodyD: '#d8d8d8', legs: '#2d4a7a', legsD: '#223a60', shoe: '#f4f4f4', style: 'slick', apron: true, h: 44 },
+  glanzEvil: { skin: '#e8b898', skinD: '#b98468', hair: '#e8c860', hairL: '#fff0a0', shirt: '#7a1a2a', body: '#1a1a24', bodyD: '#0e0e16', legs: '#1a1a24', legsD: '#0e0e16', shoe: '#f4f4f4', style: 'slick', vest: true, h: 44 },
   mehmet: { skin: '#d9a57a', skinD: '#b07e58', hair: '#2a2020', hairL: '#4a3a3a', shirt: '#e0e0e0', body: '#f0f0f0', bodyD: '#c8c8c8', legs: '#333', legsD: '#222', shoe: '#222', style: 'mehmet', glasses: true, mustache: true, apron: true, h: 42 },
 };
 
@@ -192,6 +195,34 @@ export function drawQBox(ctx, x, y, t, glow = true) {
   R('#ff5a7a', 4, -3, 1, 1);
 }
 
+export function drawProMax(ctx, x, y, t, on = true) {
+  const R = (c, a, b, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x + a), Math.round(y + b), w, h); };
+  if (on) {
+    const a = 0.25 + 0.2 * Math.sin(t * 6);
+    ctx.fillStyle = `rgba(255,80,140,${a})`;
+    ctx.beginPath(); ctx.arc(x, y - 22, 30 + Math.sin(t * 3) * 3, 0, Math.PI * 2); ctx.fill();
+  }
+  R('#111', -16, -38, 32, 34);
+  R('#2a1a3a', -15, -37, 30, 32);
+  R('#4a2a6a', -15, -37, 30, 3);
+  const p = on ? (Math.sin(t * 8) + 1) / 2 : 0;
+  R(on ? `rgb(255,${Math.round(90 + 120 * p)},${Math.round(160 + 60 * p)})` : '#333', -8, -30, 16, 16);
+  R(on ? '#fff' : '#222', -3, -25, 6, 6);
+  for (let i = 0; i < 4; i++) R(on && Math.sin(t * 10 + i) > 0 ? '#ff5a9a' : '#3a2a4a', -13 + i * 7, -10, 4, 2);
+  ctx.fillStyle = '#ffd35a'; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+  ctx.fillText('PRO MAX', x, y - 34);
+  R('#222', -18, -4, 36, 4);
+}
+
+export function drawPigeon(ctx, x, y, t, i) {
+  const R = (c, a, b, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x + a), Math.round(y + b), w, h); };
+  const bob = Math.sin(t * 6 + i * 2) > 0.3 ? 1 : 0;
+  R('#8a8a9a', -4, -5, 8, 5); R('#6a6a7a', -5, -4, 2, 3);
+  R('#9a9aaa', 2, -8 + bob, 3, 3); R('#4a8a6a', 2, -5 + bob, 3, 1);
+  R('#e0a040', 5, -7 + bob, 1, 1); R('#111', 3, -7 + bob, 1, 1);
+  R('#c06040', -1, 0, 1, 2); R('#c06040', 2, 0, 1, 2);
+}
+
 export function drawCar(ctx, x, y, t) {
   const R = (c, a, b, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x + a), Math.round(y + b), w, h); };
   R('#101018', -34, -2, 68, 3);
@@ -228,6 +259,18 @@ export const ITEMS = {
   einladung: { name: 'Einladung', desc: '„Zukunftsgipfel Wasserburg – Einladung für Prof. Dr. H. Brandl. Einlass 7:00 Uhr, Rathaussaal.“' },
   motor: { name: 'Magnetrührer', desc: 'Ein Magnetrührer aus dem Labor. Im Grunde ein sehr kleiner, sehr gleichmäßiger Motor.' },
   qbox: { name: 'Q-Box', desc: 'Die Q-Box. Sie summt leise. Ich habe das Gefühl, sie ist gleichzeitig warm und kalt.' },
+  besenstiel: { name: 'Besenstiel', desc: 'Der Stiel meines alten Wischmopps. Den Kopf habe ich in Kapitel 1 für eine Verkleidung geopfert. Ich trage ihn seitdem bei mir. Aus Sentimentalität.' },
+  massband: { name: 'Maßband', desc: 'Ein Stahl-Maßband, fünf Meter. Gelb, federnd, mit Ecken, an denen man sich schneidet.' },
+  eimer: { name: 'Eimer', desc: 'Mein alter Putzeimer. Leer. Er riecht nach Zitrusreiniger und Erinnerungen.' },
+  wassereimer: { name: 'Eimer mit Innwasser', desc: 'Innwasser. Es dreht sich im Eimer langsam gegen den Uhrzeigersinn. Das sollte es nicht tun.' },
+  yagi: { name: 'Maßband-Yagi', desc: 'Drei Stücke Maßband am Besenstiel: eine Richtantenne für das Zwei-Meter-Band. Funkamateure bauen die wirklich so!' },
+  funkgeraet: { name: 'Handfunkgerät', desc: 'Das alte Handfunkgerät der Frau Professor. 145 MHz. Der Akku ist leer.' },
+  funkgeraetVoll: { name: 'Handfunkgerät (geladen)', desc: 'Voll geladen – mit Strom von KARL. Es rauscht erwartungsvoll.' },
+  peiler: { name: 'Peilempfänger', desc: 'Funkgerät plus Maßband-Yagi: ein echter Peilempfänger für die Fuchsjagd. Draußen einsetzen!', self: 'Peilen' },
+  stadtplan: { name: 'Stadtplan', desc: 'Ein Stadtplan von Wasserburg. Die Frau Professor hat Funk-Standorte mit Kuli eingezeichnet. Und eine Kaffeetasse.', self: 'Einzeichnen' },
+  tasse: { name: 'Tasse', desc: 'Die Tasse der Frau Professor. Aufschrift: „Weltbeste Professorin“. Innen ein Tee-Rand. Seit drei Wochen.' },
+  kaffee: { name: 'Kaffee', desc: 'Echter Kaffee aus dem Institutsautomaten. Ein historisches Dokument. Er dampft.' },
+  doener: { name: 'Döner', desc: 'Ein Döner von Mehmet. Mit allem und scharf. Er ist so schwer, dass er ein eigenes Gravitationsfeld hat.' },
   zertifikat: { name: 'Mehmets Zertifikat', desc: '„Kai Wimmer hat die Grundlagen des Peer-Review-Duells erlernt. Gez. Prof. (a. D.) Mehmet Yılmaz, Inn-Kebab.“ Mit Knoblauchsoßen-Fleck.' },
 };
 
@@ -265,6 +308,33 @@ export function drawItem(ctx, id) {
       R('#ddd', 2, 8, 12, 6); R('#aaa', 2, 13, 12, 1); R('#333', 4, 10, 3, 2); R('#3a3', 10, 10, 2, 1); R('#bbe', 5, 3, 6, 5); R('#fff', 7, 5, 2, 1); break;
     case 'qbox':
       R('#223', 2, 2, 12, 12); R('#3a4a6a', 3, 3, 10, 10); R('#9ef', 5, 5, 6, 6); R('#fff', 7, 7, 2, 2); break;
+    case 'besenstiel':
+      R('#a07040', 7, 0, 2, 16); R('#c09060', 7, 0, 1, 16); R('#777', 6, 14, 4, 2); break;
+    case 'massband':
+      R('#f0c020', 2, 4, 11, 10); R('#c09010', 2, 12, 11, 2); R('#333', 5, 7, 5, 4); R('#ddd', 13, 9, 3, 2); R('#999', 12, 9, 1, 2); break;
+    case 'eimer':
+    case 'wassereimer':
+      R('#f0c020', 3, 5, 10, 10); R('#c09010', 3, 13, 10, 2); R('#888', 2, 3, 12, 1); R('#888', 2, 3, 1, 4); R('#888', 13, 3, 1, 4);
+      if (id === 'wassereimer') { R('#4aa0e0', 4, 5, 8, 2); R('#aee', 6, 5, 3, 1); }
+      break;
+    case 'yagi':
+      R('#a07040', 7, 1, 2, 15); R('#f0c020', 1, 3, 14, 1); R('#f0c020', 2, 7, 12, 1); R('#f0c020', 3, 11, 10, 1); break;
+    case 'funkgeraet':
+    case 'funkgeraetVoll':
+      R('#222', 5, 5, 7, 11); R('#333', 6, 6, 5, 3); R('#555', 8, 0, 1, 5); R('#444', 6, 10, 5, 4); R('#666', 7, 11, 1, 1); R('#666', 9, 11, 1, 1); R('#666', 7, 13, 1, 1); R('#666', 9, 13, 1, 1);
+      R(id === 'funkgeraetVoll' ? '#3f3' : '#f33', 10, 6, 1, 1); if (id === 'funkgeraetVoll') R('#9f6', 6, 7, 3, 1);
+      break;
+    case 'peiler':
+      R('#a07040', 1, 7, 14, 2); R('#f0c020', 3, 1, 1, 14); R('#f0c020', 7, 2, 1, 12); R('#f0c020', 11, 3, 1, 10); R('#222', 9, 9, 5, 7); R('#3f3', 12, 10, 1, 1); break;
+    case 'stadtplan':
+      R('#f0ead0', 1, 2, 14, 12); R('#d8d0b0', 5, 2, 1, 12); R('#d8d0b0', 10, 2, 1, 12); R('#4aa0e0', 1, 9, 14, 2); R('#a0c880', 2, 3, 3, 4); R('#c03040', 8, 4, 3, 3); R('#555', 12, 6, 2, 2); break;
+    case 'tasse':
+    case 'kaffee':
+      R('#f4f4f4', 3, 6, 8, 9); R('#ddd', 3, 14, 8, 1); R('#f4f4f4', 11, 8, 3, 1); R('#f4f4f4', 13, 8, 1, 4); R('#f4f4f4', 11, 11, 3, 1); R('#c03040', 5, 9, 4, 2);
+      if (id === 'kaffee') { R('#6a3a1a', 4, 6, 6, 2); R('#ddd', 5, 1, 1, 3); R('#ddd', 7, 2, 1, 3); R('#ddd', 9, 0, 1, 3); }
+      break;
+    case 'doener':
+      R('#e0b070', 2, 3, 12, 11); R('#c89050', 2, 3, 12, 1); R('#8a5a30', 4, 4, 8, 4); R('#6ab04a', 4, 5, 3, 2); R('#e04040', 9, 5, 2, 2); R('#f4f4f4', 5, 8, 6, 1); R('#f0e0c0', 3, 10, 10, 4); break;
     case 'zertifikat':
       R('#f4ecd8', 1, 2, 14, 12); R('#8a6a30', 3, 5, 10, 1); R('#8a6a30', 3, 7, 8, 1); R('#f0f0d0', 9, 9, 4, 3); R('#c03040', 3, 10, 3, 3); R('#c03040', 4, 13, 1, 2); break;
   }

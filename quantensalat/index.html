@@ -32,6 +32,7 @@
       <div id="bar">
         <span id="status"></span>
         <button id="btnLook" class="sel-only" aria-label="Gegenstand ansehen">👁</button>
+        <button id="btnUse" class="sel-only use hidden" aria-label="Benutzen">▶</button>
         <button id="btnCancel" class="sel-only" aria-label="Abbrechen">✖</button>
         <span class="spacer"></span>
         <button id="btnReveal" aria-label="Hotspots zeigen" title="Hotspots zeigen">🔍</button>
@@ -49,7 +50,8 @@
       <div class="sub">Das Wasserburg-Paradoxon</div>
       <p class="blurb">Ein Point-&amp;-Click-Abenteuer. Nachts. Im Labor. Mit Katze.</p>
       <button id="btnResume" class="btn big hidden">Weiterspielen</button>
-      <button id="btnNew" class="btn big">Neues Spiel</button>
+      <button id="btnNew" class="btn big">Kapitel 1: Nachtschicht</button>
+      <button id="btnNew2" class="btn big ch2">Kapitel 2: Der Unwahrscheinlichkeitssturm <small>NEU</small></button>
       <div class="toggles">
         <button class="toggle" data-set="sfx" aria-pressed="true">🔊 Sound</button>
         <button class="toggle" data-set="music" aria-pressed="true">🎵 Musik</button>
@@ -60,6 +62,7 @@
           <li><b>Tippen</b> auf den Boden: Kai läuft hin.</li>
           <li><b>Tippen</b> auf etwas: Ansehen, Benutzen/Nehmen oder Reden.</li>
           <li><b>Gegenstand antippen</b>, dann auf etwas im Bild: benutzen. Oder auf einen zweiten Gegenstand: kombinieren.</li>
+          <li>Manche Gegenstände kann man direkt benutzen: antippen, dann <b>▶</b>.</li>
           <li>🔍 zeigt alle interessanten Stellen, 💡 gibt einen Tipp.</li>
           <li>Das Spiel speichert automatisch.</li>
         </ul>
@@ -84,13 +87,14 @@
   <section id="scrEnd" class="screen">
     <div class="card title">
       <div class="logo">ENDE</div>
-      <p class="blurb">Kai Wimmer ist jetzt Doktorand.<br>Der Kaffeeautomat ist immer noch kaputt.<br>Schrödinger ist in der Box. Vielleicht.</p>
+      <p class="blurb" id="endText">Kai Wimmer ist jetzt Doktorand.<br>Der Kaffeeautomat ist immer noch kaputt.<br>Schrödinger ist in der Box. Vielleicht.</p>
+      <button id="btnNextCh" class="btn big">Weiter mit Kapitel 2 ▶</button>
       <div class="credits">
         <b>QUANTENSALAT – Das Wasserburg-Paradoxon</b><br>
         Idee, Story, Pixel-Grafik, Musik &amp; Code: komplett selbstgemacht.<br>
         Gewidmet allen Hausmeistern, Doktorandinnen, Funkamateuren und Katzen.<br>73!
       </div>
-      <button id="btnAgainEnd" class="btn big">Nochmal von vorn</button>
+      <button id="btnAgainEnd" class="btn">Nochmal von vorn</button>
       <a class="btn" href="../">🫧 Blubberei spielen</a>
       <a class="btn" href="../blockgarten/">🌷 Blockgarten spielen</a>
     </div>

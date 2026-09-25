@@ -1,5 +1,5 @@
 // Hintergründe der Szenen – Pixel-Art per Code, 320x200.
-import { drawCat, drawQBox, drawCar } from './sprites.js';
+import { drawCat, drawQBox, drawCar, drawProMax, drawPigeon } from './sprites.js';
 
 export const W = 320, H = 200;
 
@@ -235,6 +235,71 @@ export const BG = {
     R('#4a4450', 0, 150, W, 1);
   },
 
+  burghof(ctx) {
+    const { R, dith, bands, text } = tools(ctx);
+    bands(0, 0, W, 120, ['#070b1e', '#0c1230', '#141a40', '#1e2050', '#2a2658']);
+    stars(ctx, 13, 50, 0, 60);
+    moon(ctx, 60, 22, 7, '#070b1e');
+    // Burgmauer
+    const wall = (x0, y0, w, h) => {
+      R('#4a4250', x0, y0, w, h);
+      for (let y = y0; y < y0 + h; y += 7) for (let x = x0 + ((y - y0) / 7 % 2) * 8; x < x0 + w; x += 16) { R('#5a5262', x, y, 15, 6); R('#3a3440', x, y + 6, 16, 1); }
+    };
+    wall(0, 64, 200, 90);
+    for (let x = 0; x < 200; x += 20) wall(x, 54, 12, 10);
+    // Torbogen links
+    R('#141018', 0, 96, 22, 58); R('#141018', 22, 104, 4, 50);
+    // Turm
+    wall(196, 8, 86, 146);
+    for (let x = 192; x < 286; x += 16) wall(x, 0, 10, 10);
+    R('#6a2a2a', 186, 150, 0, 0);
+    // Turmfenster (Serverlicht)
+    for (const [x, y] of [[214, 30], [250, 30], [232, 62]]) { R('#1a1420', x - 1, y - 1, 12, 18); R('#2a3a5a', x, y, 10, 16); R('#2a3a5a', x + 2, y - 3, 6, 3); }
+    // Tür mit Tastenfeld
+    R('#1a1420', 222, 112, 34, 42); R('#4a2e1e', 225, 116, 28, 38); R('#3a2418', 238, 116, 2, 38);
+    R('#1a1a1a', 258, 124, 8, 11); R('#3a3a3a', 259, 125, 6, 9);
+    for (let i = 0; i < 3; i++) for (let j = 0; j < 3; j++) R('#888', 260 + i * 2, 127 + j * 2, 1, 1);
+    // Banner & Kabel
+    R('#1a3a8a', 204, 94, 70, 12); R('#3a6ad0', 204, 94, 70, 2); text('GLANZTECH BURG', 239, 100.5, '#ffe070', 6);
+    R('#111', 280, 20, 2, 134); R('#111', 276, 150, 44, 2);
+    // Antenne oben
+    R('#888', 238, -2, 2, 0);
+    // Brunnen
+    R('#5a5262', 50, 138, 40, 16); R('#6a6272', 48, 134, 44, 5); R('#3a3440', 54, 142, 32, 2); R('#4a4250', 66, 110, 2, 24); R('#4a4250', 58, 110, 18, 2);
+    // Pflaster
+    bands(0, 154, W, 46, ['#3a3440', '#35303b', '#302b36']);
+    for (let y = 156; y < H; y += 5) for (let x = ((y / 5) % 2) * 4; x < W; x += 8) R('#2a2530', x, y, 1, 1);
+    R('#4a4450', 0, 154, W, 1);
+  },
+
+  turm(ctx) {
+    const { R, dith, bands, text } = tools(ctx);
+    bands(0, 0, W, 150, ['#2a2430', '#302a36', '#36303c']);
+    for (let y = 0; y < 150; y += 9) for (let x = ((y / 9) % 2) * 11; x < W; x += 22) { R('#3e3846', x, y, 21, 8); R('#26202c', x, y + 8, 22, 1); }
+    // Balken
+    R('#3a2418', 0, 0, W, 8); R('#4a2e1e', 0, 8, W, 3);
+    for (const x of [40, 280]) R('#3a2418', x, 11, 8, 140);
+    // Schießscharte mit Nachthimmel
+    R('#141018', 150, 20, 20, 44); R('#0b1128', 154, 24, 12, 36); R('#fff', 158, 30, 1, 1); R('#fff', 162, 44, 1, 1);
+    // Serverschränke
+    for (const x of [8, 56, 234]) {
+      R('#111', x, 70, 30, 82); R('#1c1c24', x + 2, 72, 26, 78);
+      for (let y = 76; y < 146; y += 8) { R('#2a2a34', x + 4, y, 22, 6); }
+    }
+    // Monitor
+    R('#111', 184, 28, 44, 30); R('#1a0a2a', 186, 30, 40, 26);
+    text('UNWAHRSCH.', 206, 36, '#ff9ad0', 4);
+    R('#ff5a9a', 190, 50, 4, 3); R('#ff5a9a', 196, 46, 4, 7); R('#ff5a9a', 202, 42, 4, 11); R('#ff5a9a', 208, 38, 4, 15); R('#ffd35a', 214, 34, 8, 19);
+    // Steckdose rechts
+    R('#d8d0c0', 290, 118, 12, 14); R('#333', 293, 122, 2, 4); R('#333', 297, 122, 2, 4);
+    // Boden
+    bands(0, 150, W, 50, ['#4a2e1e', '#42281a', '#3a2216']);
+    for (let y = 154; y < H; y += 7) R('#34200f', 0, y, W, 1);
+    for (let y = 150; y < H; y += 7) for (let x = ((y / 7) % 3) * 25; x < W; x += 75) R('#34200f', x, y, 1, 7);
+    // Kabelsalat
+    R('#111', 150, 158, 100, 2); R('#111', 250, 150, 2, 10); R('#222', 130, 164, 40, 2);
+  },
+
   saal(ctx) {
     const { R, dith, bands, text } = tools(ctx);
     R('#3a2418', 0, 0, W, 22);
@@ -268,6 +333,20 @@ export const FX = {
     ctx.fillRect(0, 18, W, 90);
     // Brotzeitdose auf dem Putzwagen – leer, sobald genommen
     if (S.flags.brotzeitTaken) R('#e8e8e8', 116, 128, 12, 6);
+    if (S.ch === 2) {
+      // Eimer und Maßband weg?
+      if (S.flags.cartTaken) { R('#665e54', 108, 142, 16, 14); R('#555560', 106, 137, 2, 20); }
+      // Der Kaffeeautomat funktioniert (!)
+      if (!S.flags.coffeeBroken) {
+        R('#3aff7a', 229, 104, 2, 2);
+        ctx.fillStyle = 'rgba(255,220,150,0.5)'; ctx.fillRect(213, 86, 16, 12);
+        for (let i = 0; i < 3; i++) {
+          const k = (t * 0.8 + i / 3) % 1;
+          ctx.fillStyle = `rgba(240,240,240,${0.5 * (1 - k)})`;
+          ctx.fillRect(219 + Math.sin(t * 3 + i) * 2, 122 - k * 14, 2, 2);
+        }
+      }
+    }
   },
   labor(ctx, t, S) {
     const { R, glow } = tools(ctx);
@@ -287,9 +366,16 @@ export const FX = {
     // Karton mit Katze
     R('#9a7040', 250, 150, 30, 20); R('#b88a50', 250, 150, 30, 3); R('#7a5a30', 248, 147, 6, 5); R('#7a5a30', 276, 147, 6, 5);
     if (!S.flags.catOut) drawCat(ctx, 262, 153, t, true);
+    else if (S.ch === 2) drawCat(ctx, 158, 92, t, false);
     else drawCat(ctx, 106, 172, t, false);
     if (S.flags.catOut && !S.flags.karteTaken) { R('#e8e8f0', 258, 146, 10, 6); R('#3a6ea8', 258, 146, 10, 2); }
-    if (S.flags.catOut) { R('#d09040', 112, 170, 6, 2); }
+    if (S.flags.catOut && S.ch !== 2) { R('#d09040', 112, 170, 6, 2); }
+    if (S.ch === 2) {
+      const { text } = tools(ctx);
+      R('#f2f4f6', 150, 66, 45, 10);
+      text('P(Kaffee)=1 ?!', 172, 71, '#d02a6a', 5);
+      R('#d02a6a', 152, 75, 40, 1);
+    }
     // Q-Box zurück?
     if (S.flags.boxInLab) drawQBox(ctx, 160, 106, t, true);
     if (S.flags.streaming) {
@@ -309,12 +395,19 @@ export const FX = {
     const s = Math.floor((Math.sin(t * 3) + 1) * 3);
     R('#1a1a1e', 207, 99, 12, 3); R('#3a2', 207, 99, 2 + s, 3);
     if (S.flags.drawerOpen) { R('#2a1a10', 98, 124, 28, 4); }
+    if (S.ch === 2) {
+      if (!S.flags.hfgTaken) { R('#222', 248, 101, 5, 9); R('#555', 250, 95, 1, 6); R('#f33', 251, 102, 1, 1); }
+      if (!S.flags.tasseTaken) { R('#f4f4f4', 100, 104, 6, 8); R('#f4f4f4', 106, 106, 2, 1); R('#f4f4f4', 107, 106, 1, 4); R('#c03040', 101, 107, 4, 2); }
+      R('#1a1a22', 76, 92, 24, 8); R('#ff5a9a', 76, 99, 4, 1); R('#ff5a9a', 80, 97, 4, 1); R('#ff5a9a', 84, 95, 4, 1); R('#ff5a9a', 88, 93, 4, 1); R('#ff5a9a', 92, 92, 6, 1);
+    }
   },
   bruecke(ctx, t, S) {
     const { R, glow } = tools(ctx);
     // Wasserglitzern
     for (let i = 0; i < 18; i++) {
-      const x = (i * 37 + t * 10 * (1 + (i % 3))) % W;
+      // In Kapitel 2 fließt der Inn rückwärts
+      const d = S.ch === 2 ? -1 : 1;
+      const x = (((i * 37 + d * t * 10 * (1 + (i % 3))) % W) + W) % W;
       const y = 115 + (i * 13) % 26;
       ctx.fillStyle = `rgba(180,210,255,${0.25 + 0.2 * Math.sin(t * 3 + i)})`;
       ctx.fillRect(x, y, 4 + (i % 3) * 2, 1);
@@ -323,7 +416,7 @@ export const FX = {
     glow(78, 68, 50, 'rgba(255,190,80,A)', 0.12 + 0.03 * Math.sin(t * 5));
     // Dönerspieß
     const on = S.flags.spiessFixed;
-    const rot = on ? t * 3 : 0;
+    const rot = on ? (S.ch === 2 ? -t * 3 : t * 3) : 0;
     R('#888', 98, 94, 2, 34);
     for (let i = 0; i < 7; i++) {
       const w = 16 - Math.abs(i - 3) * 1.5;
@@ -337,6 +430,48 @@ export const FX = {
     const { glow } = tools(ctx);
     glow(165, 118, 30, 'rgba(255,210,120,A)', 0.2);
     drawCar(ctx, 64, 176, t);
+    if (S.ch === 2) {
+      if (S.flags.karlWashed) { ctx.fillStyle = `rgba(255,255,255,${0.5 + 0.5 * Math.sin(t * 5)})`; ctx.fillRect(40, 162, 1, 1); ctx.fillRect(78, 166, 1, 1); ctx.fillRect(58, 158, 1, 1); }
+      drawPigeon(ctx, 128, 186, t, 0); drawPigeon(ctx, 142, 190, t, 1); drawPigeon(ctx, 118, 192, t, 2);
+      const { R, text } = tools(ctx);
+      // Banner weg, dafür Absperrband vor der Tür
+      R('#e4d4b0', 150, 90, 32, 10); R('#e4d4b0', 116, 103, 98, 14);
+      for (let i = 0; i < 9; i++) R(i % 2 ? '#fff' : '#e03030', 146 + i * 4, 128 + (i % 2), 4, 3);
+      text('GESCHLOSSEN', 165, 110, '#8a3a2a', 5);
+      // Wegweiser zur Burg
+      R('#5a3a28', 300, 136, 2, 30); R('#e8dcc0', 284, 132, 30, 9); R('#e8dcc0', 314, 134, 3, 5);
+      text('BURG →', 298, 137, '#3a2a1a', 5);
+    }
+  },
+  burghof(ctx, t, S) {
+    const { R, glow } = tools(ctx);
+    for (const [x, y] of [[219, 38], [255, 38], [237, 70]]) glow(x, y, 16, 'rgba(90,220,255,A)', 0.25 + 0.15 * Math.sin(t * 4 + x));
+    if (Math.sin(t * 3) > 0) { R('#ff3040', 238, 2, 2, 2); glow(239, 3, 6, 'rgba(255,60,60,A)', 0.5); }
+    // unwahrscheinliche Funken
+    for (let i = 0; i < 6; i++) {
+      const k = (t * 0.3 + i / 6) % 1;
+      ctx.fillStyle = `rgba(255,120,200,${0.6 * (1 - k)})`;
+      ctx.fillRect(210 + ((i * 29) % 60), 110 - k * 100, 1, 1);
+    }
+  },
+  turm(ctx, t, S) {
+    const { R, glow } = tools(ctx);
+    for (const x of [8, 56, 234]) for (let y = 76; y < 146; y += 8) {
+      if (Math.sin(t * 7 + x + y) > 0) R('#3aff7a', x + 22, y + 2, 2, 2);
+      if (Math.sin(t * 5 + x * 2 + y) > 0.4 && !S.flags.proMaxOff) R('#ff5a9a', x + 18, y + 2, 2, 2);
+    }
+    drawProMax(ctx, 160, 158, t, !S.flags.proMaxOff);
+    // Stromkabel zur Steckdose
+    R('#111', 176, 152, 116, 2); R('#111', 290, 128, 2, 26);
+    if (!S.flags.proMaxOff) { R('#1a1a1a', 292, 124, 6, 6); R('#666', 298, 126, 3, 2); }
+    else { R('#1a1a1a', 280, 150, 6, 6); R('#666', 286, 152, 3, 2); }
+    if (S.flags.overdrive && !S.flags.proMaxOff) {
+      for (let i = 0; i < 8; i++) { ctx.fillStyle = `rgba(255,${120 + i * 15},220,${Math.random() * 0.8})`; ctx.fillRect(130 + Math.random() * 60, 110 + Math.random() * 50, 2, 2); }
+    }
+    if (S.flags.overdrive) {
+      // übrig gebliebene Tuba
+      R('#d8b040', 266, 162, 14, 12); R('#f0d060', 274, 152, 10, 12); R('#b89020', 266, 172, 16, 3); R('#f8e080', 278, 152, 8, 2);
+    }
   },
   saal(ctx, t, S) {
     const { R } = tools(ctx);
@@ -356,10 +491,12 @@ export const FG = {
       R(c, x - 6, 175 + b, 12, 12);
     }
   },
-  bruecke(ctx) {
-    const { R, text } = tools(ctx);
-    R('#8a5a3a', 30, 126, 96, 6); R('#a87050', 30, 126, 96, 2);
-    R('#5a3a28', 32, 132, 92, 18);
-    R('#c0a060', 44, 134, 18, 10); text('Döner 7,50', 53, 139, '#3a2a1a', 3);
-  },
 };
+
+// Theke des Kebabstands – wird direkt nach Mehmet gezeichnet, damit sie nur ihn verdeckt
+export function drawCounter(ctx) {
+  const { R, text } = tools(ctx);
+  R('#8a5a3a', 30, 126, 96, 6); R('#a87050', 30, 126, 96, 2);
+  R('#5a3a28', 32, 132, 92, 18);
+  R('#c0a060', 44, 134, 18, 10); text('Döner 7,50', 53, 139, '#3a2a1a', 3);
+}

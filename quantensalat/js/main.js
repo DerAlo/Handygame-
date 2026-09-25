@@ -1,6 +1,7 @@
 import { Engine } from './engine.js';
 import * as story from './story.js';
 import { audio } from './audio.js';
+import { drawCounter } from './art.js';
 
 const $ = (id) => document.getElementById(id);
 
@@ -13,8 +14,15 @@ audio.sfxOn = settings.sfx;
 audio.musicOn = settings.music;
 
 const E = new Engine(story);
+const END = {
+  1: 'Kai Wimmer ist jetzt Doktorand.<br>Der Kaffeeautomat ist immer noch kaputt.<br>Schrödinger ist in der Box. Vielleicht.',
+  2: 'Der Inn fließt wieder in die richtige Richtung.<br>Sven Glanz liefert jetzt Döner aus – mit KARL.<br>Schrödinger sitzt auf zwei Boxen gleichzeitig.<br><br><b>Fortsetzung folgt …?</b>',
+};
 E.onEnd = () => {
+  const ch = E.S.ch || 1;
   Engine.clearSave();
+  $('endText').innerHTML = END[ch];
+  $('btnNextCh').classList.toggle('hidden', ch !== 1);
   setTimeout(() => { show('scrEnd'); audio.play('ende'); }, 800);
 };
 
@@ -23,15 +31,17 @@ function show(id) {
 }
 
 function refreshTitle() {
-  $('btnResume').classList.toggle('hidden', !Engine.hasSave());
+  const s = Engine.hasSave() && E.load();
+  $('btnResume').classList.toggle('hidden', !s);
+  if (s) $('btnResume').textContent = `Weiterspielen (Kapitel ${s.ch || 1})`;
 }
 
-async function newGame() {
-  if (Engine.hasSave() && !confirm('Neues Spiel starten? Der bisherige Spielstand wird überschrieben.')) return;
+async function newGame(ch = 1) {
+  if (Engine.hasSave() && !confirm(`Kapitel ${ch} starten? Der bisherige Spielstand wird überschrieben.`)) return;
   Engine.clearSave();
   show(null);
   E.select(null);
-  await E.start(E.newState(), true);
+  await E.start(E.newState(ch), true);
 }
 async function resume() {
   const s = E.load();
@@ -41,12 +51,14 @@ async function resume() {
 }
 
 const click = (id, fn) => $(id).addEventListener('click', (e) => { e.stopPropagation(); audio.unlock(); audio.blip(); fn(); });
-click('btnNew', newGame);
+click('btnNew', () => newGame(1));
+click('btnNew2', () => newGame(2));
+click('btnNextCh', () => { Engine.clearSave(); show(null); E.select(null); E.start(E.newState(2), true); });
 click('btnResume', resume);
 click('btnMenu', () => { if (!E.busy) show('scrMenu'); });
 click('btnBack', () => show(null));
 click('btnTitle', () => { E.save(); refreshTitle(); show('scrTitle'); audio.play('title'); });
-click('btnAgainEnd', () => { Engine.clearSave(); show(null); E.start(E.newState(), true); });
+click('btnAgainEnd', () => { const ch = E.S?.ch || 1; Engine.clearSave(); show(null); E.select(null); E.start(E.newState(ch), true); });
 
 function syncToggles() { for (const b of document.querySelectorAll('.toggle')) b.setAttribute('aria-pressed', String(!!settings[b.dataset.set])); }
 for (const b of document.querySelectorAll('.toggle')) {
@@ -82,7 +94,7 @@ function drawTitleBackdrop(t) {
   if (!E.S) E.S = E.newState();
   E.S.scene = 'bruecke';
   E.t = t;
-  E.actors = { mehmet: { id: 'mehmet', who: 'mehmet', x: 80, y: 146, dir: 1, phase: 0 } };
+  E.actors = { mehmet: { id: 'mehmet', who: 'mehmet', x: 80, y: 146, dir: 1, phase: 0, after: drawCounter } };
   E.render();
 }
 
