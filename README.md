@@ -1,3 +1,14 @@
+# Handyspiele 🫧🌷
+
+Zwei entspannte Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und als App auf dem Homescreen.
+
+| Spiel | Adresse | Prinzip |
+|---|---|---|
+| **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
+| **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
+
+---
+
 # Blubberei 🫧
 
 Ein entspanntes Merge-Spiel für zwischendurch – läuft direkt im Handy-Browser, auch offline und als App auf dem Homescreen.
@@ -58,3 +69,17 @@ Nach Änderungen die `VERSION` in `sw.js` erhöhen, damit installierte Versionen
 - `ads.interstitial()` – vor jeder 3. neuen Runde
 
 Zum Aktivieren: AdSense-Konto + H5-Games-Freigabe, `ADS_ENABLED = true` und Publisher-ID setzen. In der EU wird zusätzlich ein Consent-Banner (CMP) benötigt, dazu Impressum und Datenschutzerklärung.
+
+---
+
+# Blockgarten 🌷
+
+Ein gemütliches Block-Puzzle: Drei Beet-Teile liegen bereit, du ziehst sie auf ein 8×8-Beet. Volle Reihen und Spalten erblühen in einem Blütenregen und verschwinden. Mehrere Linien auf einmal und Serien (mehrmals hintereinander abräumen) bringen Multiplikatoren. Passt kein Teil mehr, ist die Runde vorbei.
+
+**Warum es Spaß macht und nicht stresst:** Kein Timer. Jeder Zug kann in Ruhe überlegt werden. Die Vorschau zeigt beim Ziehen, welche Linien gleich erblühen. Der Teile-Generator ist fair (mindestens ein Teil passt immer beim Nachlegen, bei vollem Beet kommen eher kleine Teile). Im Hintergrund erblühen mit steigender Punktzahl Blumen auf der Wiese.
+
+- Grafik (Kacheln, Blüten, Wiese, Wolken) komplett per Code: `blockgarten/js/tiles.js`
+- Sounds (Holzklötzchen, Kalimba-Glockenspiel) und ruhige Kalimba-Musik synthetisiert: `blockgarten/js/audio.js`
+- Spiellogik & Rendering: `blockgarten/js/game.js`, UI: `blockgarten/js/main.js`
+- Werbung: nutzt dieselbe `js/ads.js` – „3 neue Teile & weiter“ als Belohnungs-Video, Pausen-Werbung vor jeder 3. Runde
+- Icons neu erzeugen: `node tools/make-garten-icons.mjs` (bei laufendem `http-server -p 8080`)
