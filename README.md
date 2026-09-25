@@ -1,11 +1,12 @@
-# Handyspiele 🫧🌷
+# Handyspiele 🫧🌷🧪
 
-Zwei entspannte Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und als App auf dem Homescreen.
+Drei Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und als App auf dem Homescreen.
 
 | Spiel | Adresse | Prinzip |
 |---|---|---|
 | **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
 | **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
+| **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure im Stil der Klassiker |
 
 ---
 
@@ -83,3 +84,25 @@ Ein gemütliches Block-Puzzle: Drei Beet-Teile liegen bereit, du ziehst sie auf 
 - Spiellogik & Rendering: `blockgarten/js/game.js`, UI: `blockgarten/js/main.js`
 - Werbung: nutzt dieselbe `js/ads.js` – „3 neue Teile & weiter“ als Belohnungs-Video, Pausen-Werbung vor jeder 3. Runde
 - Icons neu erzeugen: `node tools/make-garten-icons.mjs` (bei laufendem `http-server -p 8080`)
+
+---
+
+# Quantensalat 🧪 – Das Wasserburg-Paradoxon
+
+Ein Point-&-Click-Adventure im Geist der LucasArts-Klassiker – aber heute, in der Wissenschaft, und in Wasserburg am Inn.
+
+**Story:** Kai Wimmer, Studienabbrecher und Nacht-Hausmeister am „Institut für Angewandte Unwahrscheinlichkeit“, will Wissenschaftler werden. In dieser Nacht klaut Tech-Bro Sven Glanz (CEO von GlanzTech) die Q-Box von Prof. Brandl – eine Maschine, die Unwahrscheinliches wahrscheinlich macht. Die Professorin landet dabei in Superposition (halb da, halb weg). Um 7 Uhr will Glanz die unkalibrierte Box beim „Zukunftsgipfel“ im Rathaus vorführen – und riskiert, dass ganz Wasserburg in Superposition fällt.
+
+**Das Herzstück:** das *Peer-Review-Duell* – das Gegenstück zum Beleidigungsfechten. Glanz haut Pseudo-Argumente raus (Scheinkorrelation, n = 1, p-Hacking, Buzzword-Bingo, Autoritätsargument …), Kai kontert mit dem richtigen wissenschaftlichen Gegenargument. Die Konter lernt man bei Mehmet, dem Ex-Professor für Wissenschaftstheorie, der heute den Kebabstand an der Innbrücke betreibt.
+
+**Schauplätze:** Institutsflur, Labor (mit Katze Schrödinger), Professorenbüro mit Amateurfunk-Station, Innbrücke vor dem Brucktor, Rathausplatz, Rathaussaal.
+
+**Bedienung (Handy):** Tippen = laufen / Objekt-Menü (Ansehen, Benutzen, Reden). Gegenstand antippen und dann ein Objekt → benutzen; zwei Gegenstände nacheinander → kombinieren. 🔍 zeigt alle Hotspots, 💡 gibt einen Tipp passend zum Spielfortschritt. Im Hochformat folgt die Kamera Kai, im Querformat sieht man die ganze Szene. Automatisches Speichern.
+
+**Technik – alles selbst gemacht:**
+- `quantensalat/js/engine.js` – Adventure-Engine: Szenen, Laufen, Hotspots, Verben, Inventar, Dialogbäume, Kamera, Speichern
+- `quantensalat/js/story.js` – komplette Story, Rätsel, Dialoge, Tipps
+- `quantensalat/js/duel.js` – Peer-Review-Duell
+- `quantensalat/js/art.js`, `sprites.js` – Pixel-Art-Hintergründe, Figuren (mit Laufanimation, Lippenbewegung, Blinzeln) und Gegenstände, alles per Code
+- `quantensalat/js/audio.js` – Chiptune-Musik pro Ort und Soundeffekte (inkl. Morsezeichen)
+- Später Werbung: Der 💡-Tipp-Knopf bietet sich als Belohnungs-Video an („Tipp gegen Werbung“)

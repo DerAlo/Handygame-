@@ -1,9 +1,9 @@
 // Offline-Cache: Spiel lädt sofort und funktioniert ohne Netz.
 // Bei jeder Veröffentlichung VERSION erhöhen, damit Updates ankommen.
-const VERSION = 'blubberei-v3';
+const VERSION = 'quantensalat-v1';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'manifest.webmanifest',
-  'js/main.js', 'js/game.js', 'js/sprites.js', 'js/audio.js', 'js/ads.js',
+  './', 'index.html', 'style.css', 'manifest.webmanifest',
+  'js/main.js', 'js/engine.js', 'js/story.js', 'js/duel.js', 'js/art.js', 'js/sprites.js', 'js/audio.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
 

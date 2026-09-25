@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>Quantensalat – Das Wasserburg-Paradoxon</title>
+  <meta name="description" content="Quantensalat – ein Point-&-Click-Adventure im Stil der Klassiker. Nacht-Hausmeister Kai muss Wasserburg vor einer entfesselten Quantenbox retten.">
+  <meta name="theme-color" content="#0b1128">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Quantensalat">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta property="og:title" content="Quantensalat – Das Wasserburg-Paradoxon">
+  <meta property="og:description" content="Point-&-Click-Adventure für den Browser: Hausmeister gegen Tech-Bro, Argumente gegen Buzzwords.">
+  <meta property="og:image" content="icons/icon-512.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app">
+    <div id="stage">
+      <div id="world">
+        <canvas id="cv" width="320" height="200"></canvas>
+        <div id="speech"></div>
+        <div id="verbs"></div>
+      </div>
+      <div id="place"></div>
+      <div id="duelscore"></div>
+    </div>
+    <div id="panel">
+      <div id="bar">
+        <span id="status"></span>
+        <button id="btnLook" class="sel-only" aria-label="Gegenstand ansehen">👁</button>
+        <button id="btnCancel" class="sel-only" aria-label="Abbrechen">✖</button>
+        <span class="spacer"></span>
+        <button id="btnReveal" aria-label="Hotspots zeigen" title="Hotspots zeigen">🔍</button>
+        <button id="btnHint" aria-label="Tipp" title="Tipp">💡</button>
+        <button id="btnMenu" aria-label="Menü" title="Menü">☰</button>
+      </div>
+      <div id="inv"></div>
+      <div id="choices"></div>
+    </div>
+  </div>
+
+  <section id="scrTitle" class="screen show">
+    <div class="card title">
+      <div class="logo">QUANTEN<span>SALAT</span></div>
+      <div class="sub">Das Wasserburg-Paradoxon</div>
+      <p class="blurb">Ein Point-&amp;-Click-Abenteuer. Nachts. Im Labor. Mit Katze.</p>
+      <button id="btnResume" class="btn big hidden">Weiterspielen</button>
+      <button id="btnNew" class="btn big">Neues Spiel</button>
+      <div class="toggles">
+        <button class="toggle" data-set="sfx" aria-pressed="true">🔊 Sound</button>
+        <button class="toggle" data-set="music" aria-pressed="true">🎵 Musik</button>
+      </div>
+      <details class="howto">
+        <summary>So wird gespielt</summary>
+        <ul>
+          <li><b>Tippen</b> auf den Boden: Kai läuft hin.</li>
+          <li><b>Tippen</b> auf etwas: Ansehen, Benutzen/Nehmen oder Reden.</li>
+          <li><b>Gegenstand antippen</b>, dann auf etwas im Bild: benutzen. Oder auf einen zweiten Gegenstand: kombinieren.</li>
+          <li>🔍 zeigt alle interessanten Stellen, 💡 gibt einen Tipp.</li>
+          <li>Das Spiel speichert automatisch.</li>
+        </ul>
+      </details>
+      <p class="rot">📱 Tipp: Im Querformat wird die Grafik größer.</p>
+    </div>
+  </section>
+
+  <section id="scrMenu" class="screen">
+    <div class="card">
+      <h2>Pause</h2>
+      <button id="btnBack" class="btn big">Weiter</button>
+      <div class="toggles">
+        <button class="toggle" data-set="sfx" aria-pressed="true">🔊 Sound</button>
+        <button class="toggle" data-set="music" aria-pressed="true">🎵 Musik</button>
+      </div>
+      <button id="btnTitle" class="btn">Zum Titelbild</button>
+      <p class="small">Dein Fortschritt wird automatisch gespeichert.</p>
+    </div>
+  </section>
+
+  <section id="scrEnd" class="screen">
+    <div class="card title">
+      <div class="logo">ENDE</div>
+      <p class="blurb">Kai Wimmer ist jetzt Doktorand.<br>Der Kaffeeautomat ist immer noch kaputt.<br>Schrödinger ist in der Box. Vielleicht.</p>
+      <div class="credits">
+        <b>QUANTENSALAT – Das Wasserburg-Paradoxon</b><br>
+        Idee, Story, Pixel-Grafik, Musik &amp; Code: komplett selbstgemacht.<br>
+        Gewidmet allen Hausmeistern, Doktorandinnen, Funkamateuren und Katzen.<br>73!
+      </div>
+      <button id="btnAgainEnd" class="btn big">Nochmal von vorn</button>
+      <a class="btn" href="../">🫧 Blubberei spielen</a>
+      <a class="btn" href="../blockgarten/">🌷 Blockgarten spielen</a>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
