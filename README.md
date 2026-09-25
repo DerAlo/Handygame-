@@ -6,7 +6,7 @@ Drei Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und a
 |---|---|---|
 | **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
 | **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
-| **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure im Stil der Klassiker |
+| **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure-Trilogie im Stil der Klassiker |
 
 ---
 
@@ -116,3 +116,16 @@ Drei Wochen später: Kai ist Doktorand – und in Wasserburg passieren unmöglic
 - **Peer-Review-Duell 2.0:** acht neue Denkfehler (Strohmann, Whataboutism, Anekdote, Naturalistischer Fehlschluss, Survivorship Bias, Spielerfehlschluss, Falsches Dilemma, Torpfosten verschieben). Trainer: Glanzi – er kennt alle Tricks seines Zwillings.
 - **Neue Mechanik:** Manche Gegenstände benutzt man direkt (antippen → „▶“), z. B. den Peilempfänger.
 - Code: `quantensalat/js/story2.js`
+
+## Kapitel 3: Der Katzensprung
+
+Schrödinger sitzt auf der Q-Box UND der Pro Max – die beiden verschränken sich und reißen einen Zeitriss auf. Die Katze springt hinein und landet im **Jahr 1524** in der Kräuterhütte von Hildegard, der Ahnin der Professorin. Dort gilt sie als Hexenkatze: Der Amulettkrämer **Sigmund von Glanz** (Glanz’ Urahn) klagt Hildegard der Hexerei an. Wird sie verurteilt, gibt es in der Gegenwart weder die Professorin noch das Institut.
+
+- **Zeitreise:** Szenen in der Gegenwart und im Jahr 1524 (Hütte, Holz-Innbrücke mit Salzschiff, Marktplatz mit Pranger, Ratssaal) – die Vergangenheit im Sepia-Look.
+- **Funk durch die Zeit:** Mit „Rudi“ (▶ Funken) spricht Kai mit der Professorin; sie wirft Dinge durch den Riss (Würfelzucker für Mehmed Efendi, den ersten Kaffeehändler Bayerns).
+- **Stadtchronik** (▶ Lesen) zeigt, wie sich die Geschichte durch Kais Handeln verändert.
+- **Peer-Review-Duell vor dem Rat:** acht neue Denkfehler (Danach-also-deswegen, Beweislastumkehr, Ad hominem, Zirkelschluss, Traditionsargument, Bestätigungsfehler, Dammbruch, Argument aus Unwissenheit). Trainer: Mehmed Efendi.
+- Abschluss der Trilogie – mit Kaffee.
+- Code: `quantensalat/js/story3.js`
+
+Außerdem: Gesprächsthemen erscheinen jetzt erst, wenn Kai davon wissen kann, und erledigte Themen verschwinden.

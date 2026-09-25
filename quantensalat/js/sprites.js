@@ -18,6 +18,12 @@ export const CHARS = {
   kaiPhd: { skin: '#f0c09a', skinD: '#c98f6c', hair: '#5a3a22', hairL: '#7c5634', shirt: '#6aa0d0', body: '#f4f4f8', bodyD: '#c8c8d8', legs: '#3a6ea8', legsD: '#29507c', shoe: '#3a2a20', style: 'messy', coat: true, h: 42 },
   glanzi: { skin: '#f2c6a0', skinD: '#c9947a', hair: '#e8c860', hairL: '#fff0a0', shirt: '#ffffff', body: '#ffffff', bodyD: '#d8d8d8', legs: '#2d4a7a', legsD: '#223a60', shoe: '#f4f4f4', style: 'slick', apron: true, h: 44 },
   glanzEvil: { skin: '#e8b898', skinD: '#b98468', hair: '#e8c860', hairL: '#fff0a0', shirt: '#7a1a2a', body: '#1a1a24', bodyD: '#0e0e16', legs: '#1a1a24', legsD: '#0e0e16', shoe: '#f4f4f4', style: 'slick', vest: true, h: 44 },
+  hildegard: { skin: '#f3cba8', skinD: '#c9987a', hair: '#7a4a2a', hairL: '#9a6a40', shirt: '#e8dcc0', body: '#5a7a4a', bodyD: '#3e5a32', legs: '#5a7a4a', legsD: '#3e5a32', shoe: '#3a2a1a', style: 'bun', coat: true, h: 38 },
+  sigmund: { skin: '#f2c6a0', skinD: '#c9947a', hair: '#e8c860', hairL: '#fff0a0', shirt: '#f0e8d0', body: '#a02a3a', bodyD: '#701a28', legs: '#e8c860', legsD: '#c8a040', shoe: '#3a2a1a', style: 'barett', vest: true, h: 44 },
+  mehmed: { skin: '#d9a57a', skinD: '#b07e58', hair: '#2a2020', hairL: '#4a3a3a', shirt: '#e0d0b0', body: '#2a5a8a', bodyD: '#1a3a60', legs: '#e0d0b0', legsD: '#c0b090', shoe: '#8a3a2a', style: 'turban', glasses: false, mustache: true, apron: true, apronCol: '#2a5a8a', h: 42 },
+  bernhard: { skin: '#b07a52', skinD: '#8a5a3a', hair: '#3a2a1a', hairL: '#5a4a3a', shirt: '#8a7a5a', body: '#5a4a2a', bodyD: '#3a2e1a', legs: '#4a4a3a', legsD: '#3a3a2a', shoe: '#2a1a0a', style: 'buzz', suit: true, wide: 2, h: 46 },
+  schreiber: { skin: '#f0c8a8', skinD: '#c89878', hair: '#9a9a9a', hairL: '#c0c0c0', shirt: '#e8e0d0', body: '#4a4a5a', bodyD: '#34343f', legs: '#4a4a5a', legsD: '#34343f', shoe: '#2a1a0a', style: 'bald', coat: true, glasses: true, h: 40 },
+  ratsherr: { skin: '#f0c8a8', skinD: '#c89878', hair: '#e0e0e0', hairL: '#ffffff', shirt: '#f0f0f0', body: '#1a1a22', bodyD: '#0e0e14', legs: '#1a1a22', legsD: '#0e0e14', shoe: '#0a0a0a', style: 'barett', coat: true, mustache: true, h: 42 },
   mehmet: { skin: '#d9a57a', skinD: '#b07e58', hair: '#2a2020', hairL: '#4a3a3a', shirt: '#e0e0e0', body: '#f0f0f0', bodyD: '#c8c8c8', legs: '#333', legsD: '#222', shoe: '#222', style: 'mehmet', glasses: true, mustache: true, apron: true, h: 42 },
 };
 
@@ -75,8 +81,8 @@ export function drawPerson(ctx, x, y, o) {
     }
     if (c.apron) {
       r(c.body, -tw / 2, ty, tw, torsoH);
-      r('#b04030', -tw / 2 + 1, ty + 4, tw - 2, torsoH + 2);
-      r('#d05a48', -tw / 2 + 1, ty + 4, tw - 2, 1);
+      r(c.apronCol || '#b04030', -tw / 2 + 1, ty + 4, tw - 2, torsoH + 2);
+      r(c.apronCol ? '#4a7ab0' : '#d05a48', -tw / 2 + 1, ty + 4, tw - 2, 1);
     }
   }
 
@@ -157,6 +163,22 @@ export function drawPerson(ctx, x, y, o) {
       r(hc, -4, hy - 1, 9, 2);
       r(hc, -4, hy, 2, 3);
       break;
+    case 'barett':
+      r(hc, -5, hy, 3, 5);
+      r(c.body, -6, hy - 3, 13, 3);
+      r(c.bodyD, -5, hy - 5, 10, 2);
+      r('#f4f4f4', -7, hy - 8, 2, 5); r('#f4f4f4', -8, hy - 9, 2, 2);
+      break;
+    case 'turban':
+      r('#f0ead8', -6, hy - 4, 12, 5);
+      r('#d8d0b8', -6, hy - 2, 12, 1);
+      r('#c03040', 0, hy - 3, 2, 2);
+      r(hc, -5, hy + 1, 2, 3);
+      break;
+    case 'bald':
+      r(hc, -5, hy + 1, 2, 4);
+      r(c.hairL, -4, hy, 2, 1);
+      break;
     case 'mehmet':
       r(hc, -5, hy - 1, 10, 2);
       r(hc, -5, hy, 3, 4);
@@ -212,6 +234,35 @@ export function drawProMax(ctx, x, y, t, on = true) {
   ctx.fillStyle = '#ffd35a'; ctx.font = 'bold 5px monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
   ctx.fillText('PRO MAX', x, y - 34);
   R('#222', -18, -4, 36, 4);
+}
+
+export function drawPortal(ctx, x, y, t, size = 1) {
+  for (let i = 0; i < 5; i++) {
+    const r = (10 + i * 5) * size + Math.sin(t * 3 + i) * 2;
+    ctx.strokeStyle = `hsla(${(t * 80 + i * 40) % 360},90%,70%,${0.7 - i * 0.12})`;
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(x, y, r * 0.7, r, Math.sin(t) * 0.2, t * (i % 2 ? 1 : -1), t * (i % 2 ? 1 : -1) + Math.PI * 1.6);
+    ctx.stroke();
+  }
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.beginPath(); ctx.ellipse(x, y, 4 * size, 7 * size, 0, 0, Math.PI * 2); ctx.fill();
+}
+
+export function drawCage(ctx, x, y, t, catMood = 'angry') {
+  const R = (c, a, b, w, h) => { ctx.fillStyle = c; ctx.fillRect(Math.round(x + a), Math.round(y + b), w, h); };
+  R('#5a3a1a', -12, -2, 24, 3);
+  drawCat(ctx, x, y - 2, t, catMood !== 'sleep');
+  if (catMood === 'happy') {
+    for (let i = 0; i < 3; i++) {
+      const k = (t * 0.7 + i / 3) % 1;
+      ctx.fillStyle = `rgba(255,120,160,${1 - k})`;
+      ctx.fillRect(x + 4 + i * 3, y - 16 - k * 10, 2, 2);
+    }
+  }
+  if (catMood === 'angry' && Math.sin(t * 5) > 0.6) { ctx.fillStyle = '#fff'; ctx.font = 'bold 5px monospace'; ctx.fillText('FAUCH', x - 18, y - 18); }
+  for (let i = -12; i <= 12; i += 4) R('#3a3a3a', i, -20, 1, 18);
+  R('#3a3a3a', -12, -21, 25, 2);
 }
 
 export function drawPigeon(ctx, x, y, t, i) {
@@ -271,6 +322,16 @@ export const ITEMS = {
   tasse: { name: 'Tasse', desc: 'Die Tasse der Frau Professor. Aufschrift: „Weltbeste Professorin“. Innen ein Tee-Rand. Seit drei Wochen.' },
   kaffee: { name: 'Kaffee', desc: 'Echter Kaffee aus dem Institutsautomaten. Ein historisches Dokument. Er dampft.' },
   doener: { name: 'Döner', desc: 'Ein Döner von Mehmet. Mit allem und scharf. Er ist so schwer, dass er ein eigenes Gravitationsfeld hat.' },
+  namensschild: { name: 'Namensschild', desc: '„Kai Wimmer · Leiter Abt. Unwahrscheinlichkeitsabwehr (Doktorand)“. Das „Hausmeister“ haben sie endlich gestrichen. Mit Tipp-Ex.' },
+  chronik: { name: 'Stadtchronik', desc: 'Die Stadtchronik von Wasserburg, Band 3. Die Frau Professor sagt, die Seiten über 1524 schreiben sich gerade neu.', self: 'Lesen' },
+  rudi: { name: 'Funkgerät Rudi', desc: 'Rudi, das Handfunkgerät. Über den Zeitriss bleibt er mit der Frau Professor in Kontakt. Funk durch die Zeit – DO5ALO wäre neidisch.', self: 'Funken' },
+  kerze: { name: 'Kerze', desc: 'Eine Bienenwachskerze aus Hildegards Hütte. Riecht nach Honig und Mittelalter.' },
+  pergament: { name: 'Fürsprech-Brief', desc: 'Ein Brief vom Stadtschreiber: „Der Gelehrte Kai von Wimmer darf vor dem Rat als Fürsprech reden.“ Es fehlt noch ein Siegel.' },
+  brief: { name: 'Gesiegelter Fürsprech-Brief', desc: 'Mit meinem Namensschild in Wachs gesiegelt. Man liest „…LEITER ABT. UNWAHRSCH…“. Sehr amtlich.' },
+  baldrian: { name: 'Baldrianwurzel', desc: 'Getrocknete Baldrianwurzel. Menschen macht sie ruhig. Katzen macht sie … sehr, sehr glücklich.' },
+  zucker: { name: 'Würfelzucker', desc: 'Eine Packung Würfelzucker aus der Institutsküche, durch 500 Jahre geworfen. Im Jahr 1524 ein Vermögen wert.' },
+  bohnen: { name: 'Kaffeebohnen', desc: 'Kaffeebohnen von Mehmed Efendi, Jahrgang 1524. Die ersten in ganz Bayern.' },
+  amulett: { name: 'Glücksamulett', desc: 'Ein „Glücksamulett“ von Sigmund von Glanz. Bei genauem Hinsehen: ein bemalter Innkiesel. Unten klebt noch Flusssand.' },
   zertifikat: { name: 'Mehmets Zertifikat', desc: '„Kai Wimmer hat die Grundlagen des Peer-Review-Duells erlernt. Gez. Prof. (a. D.) Mehmet Yılmaz, Inn-Kebab.“ Mit Knoblauchsoßen-Fleck.' },
 };
 
@@ -335,6 +396,27 @@ export function drawItem(ctx, id) {
       break;
     case 'doener':
       R('#e0b070', 2, 3, 12, 11); R('#c89050', 2, 3, 12, 1); R('#8a5a30', 4, 4, 8, 4); R('#6ab04a', 4, 5, 3, 2); R('#e04040', 9, 5, 2, 2); R('#f4f4f4', 5, 8, 6, 1); R('#f0e0c0', 3, 10, 10, 4); break;
+    case 'namensschild':
+      R('#f4f4f4', 1, 5, 14, 7); R('#3a6ea8', 1, 5, 14, 2); R('#333', 3, 8, 9, 1); R('#999', 3, 10, 6, 1); R('#aaa', 7, 3, 2, 2); break;
+    case 'chronik':
+      R('#5a2a1a', 2, 2, 12, 13); R('#7a3a22', 3, 2, 11, 12); R('#caa040', 5, 5, 6, 1); R('#caa040', 5, 7, 6, 1); R('#f0e8d0', 13, 3, 1, 11); break;
+    case 'rudi':
+      R('#222', 5, 5, 7, 11); R('#333', 6, 6, 5, 3); R('#555', 8, 0, 1, 5); R('#444', 6, 10, 5, 4); R('#3f3', 10, 6, 1, 1); R('#9f6', 6, 7, 3, 1); R('#ffd35a', 13, 1, 1, 1); R('#ffd35a', 14, 3, 1, 1); break;
+    case 'kerze':
+      R('#f0e0a0', 6, 5, 4, 10); R('#d8c880', 6, 13, 4, 2); R('#333', 7, 3, 1, 2); R('#ffb030', 7, 0, 2, 3); R('#fff0a0', 7, 1, 1, 1); break;
+    case 'pergament':
+    case 'brief':
+      R('#e8dcb0', 2, 2, 12, 12); R('#c8b888', 2, 13, 12, 1); R('#6a5a3a', 4, 5, 8, 1); R('#6a5a3a', 4, 7, 7, 1); R('#6a5a3a', 4, 9, 8, 1);
+      if (id === 'brief') { R('#b02030', 9, 10, 5, 5); R('#d04050', 10, 11, 2, 2); }
+      break;
+    case 'baldrian':
+      R('#8a6a3a', 5, 6, 6, 8); R('#6a4a2a', 3, 11, 3, 4); R('#6a4a2a', 10, 11, 3, 4); R('#5a8a3a', 6, 1, 1, 5); R('#5a8a3a', 9, 2, 1, 4); R('#f0f0f0', 5, 0, 3, 2); R('#f0f0f0', 8, 1, 3, 2); break;
+    case 'zucker':
+      R('#3a6ea8', 2, 4, 12, 10); R('#f4f4f4', 4, 6, 3, 3); R('#f4f4f4', 8, 6, 3, 3); R('#f4f4f4', 6, 10, 3, 3); R('#e0e0e0', 11, 10, 2, 2); break;
+    case 'bohnen':
+      R('#c8a060', 3, 4, 10, 11); R('#a88040', 3, 4, 10, 2); R('#4a2a1a', 5, 7, 3, 2); R('#4a2a1a', 9, 8, 3, 2); R('#4a2a1a', 6, 11, 3, 2); R('#2a1a0a', 6, 7, 1, 2); break;
+    case 'amulett':
+      R('#8a8a8a', 7, 1, 2, 4); R('#6a7a8a', 4, 5, 8, 9); R('#e03040', 6, 7, 4, 4); R('#ffd35a', 7, 8, 2, 2); R('#c8b888', 5, 13, 6, 1); break;
     case 'zertifikat':
       R('#f4ecd8', 1, 2, 14, 12); R('#8a6a30', 3, 5, 10, 1); R('#8a6a30', 3, 7, 8, 1); R('#f0f0d0', 9, 9, 4, 3); R('#c03040', 3, 10, 3, 3); R('#c03040', 4, 13, 1, 2); break;
   }

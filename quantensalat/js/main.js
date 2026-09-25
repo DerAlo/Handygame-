@@ -16,13 +16,16 @@ audio.musicOn = settings.music;
 const E = new Engine(story);
 const END = {
   1: 'Kai Wimmer ist jetzt Doktorand.<br>Der Kaffeeautomat ist immer noch kaputt.<br>Schrödinger ist in der Box. Vielleicht.',
-  2: 'Der Inn fließt wieder in die richtige Richtung.<br>Sven Glanz liefert jetzt Döner aus – mit KARL.<br>Schrödinger sitzt auf zwei Boxen gleichzeitig.<br><br><b>Fortsetzung folgt …?</b>',
+  2: 'Der Inn fließt wieder in die richtige Richtung.<br>Sven Glanz liefert jetzt Döner aus – mit KARL.<br>Schrödinger sitzt auf zwei Boxen gleichzeitig.',
+  3: 'Hildegard blieb in Wasserburg. Ihre Nachfahren auch.<br>Sigmund ging nach Rosenheim. Seine Nachfahren auch.<br>Der Kaffeeautomat funktioniert. Man musste ihn nur entkalken.<br><br><b>Ende der Quantensalat-Trilogie.</b><br>Danke fürs Spielen!',
 };
 E.onEnd = () => {
   const ch = E.S.ch || 1;
   Engine.clearSave();
   $('endText').innerHTML = END[ch];
-  $('btnNextCh').classList.toggle('hidden', ch !== 1);
+  $('btnNextCh').classList.toggle('hidden', ch >= 3);
+  $('btnNextCh').textContent = `Weiter mit Kapitel ${ch + 1} ▶`;
+  $('endLogo').textContent = ch >= 3 ? 'THE END' : `ENDE KAPITEL ${ch}`;
   setTimeout(() => { show('scrEnd'); audio.play('ende'); }, 800);
 };
 
@@ -53,7 +56,8 @@ async function resume() {
 const click = (id, fn) => $(id).addEventListener('click', (e) => { e.stopPropagation(); audio.unlock(); audio.blip(); fn(); });
 click('btnNew', () => newGame(1));
 click('btnNew2', () => newGame(2));
-click('btnNextCh', () => { Engine.clearSave(); show(null); E.select(null); E.start(E.newState(2), true); });
+click('btnNew3', () => newGame(3));
+click('btnNextCh', () => { const next = (E.S?.ch || 1) + 1; Engine.clearSave(); show(null); E.select(null); E.start(E.newState(next), true); });
 click('btnResume', resume);
 click('btnMenu', () => { if (!E.busy) show('scrMenu'); });
 click('btnBack', () => show(null));

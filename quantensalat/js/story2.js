@@ -359,6 +359,7 @@ export function chapter2(ch1) {
         ['guard', 'Frau Professor?! … Nein. Moment. Sie sind der Typ vom Zukunftsgipfel. Der mit dem Moppkopf.'],
         ['kai', 'Äh …'],
         ['guard', 'Keine Sorge. Ich fand’s mutig. Aber rein kommen Sie trotzdem nicht.'],
+        ['guard', 'Und bevor Sie fragen: Ich hab seit Mitternacht nichts gegessen. Das macht mich besonders streng.'],
       ]);
     },
     hotspots: [
@@ -504,7 +505,7 @@ async function talkMehmet2(E) {
   }
   for (;;) {
     const opts = [];
-    if (!E.F.gotDoener) opts.push({ id: 'doener', text: 'Kann ich einen Döner haben?' });
+    if (!E.F.gotDoener && E.F.sawBurg) opts.push({ id: 'doener', text: 'Kann ich einen Döner haben? Für einen hungrigen Wachmann.' });
     opts.push({ id: 'glanzi', text: 'Wie macht sich Glanzi?' });
     opts.push({ id: 'inn', text: 'Warum fließt der Inn rückwärts?' });
     opts.push({ id: 'bye', text: 'Bis später!' });
@@ -542,9 +543,9 @@ async function talkGlanzi(E) {
   }
   for (;;) {
     const opts = [];
-    opts.push({ id: 'wo', text: 'Weißt du, wo dein böser Zwilling steckt?' });
+    if (!E.F.burgKnown) opts.push({ id: 'wo', text: 'Weißt du, wo dein böser Zwilling steckt?' });
     opts.push({ id: 'tricks', text: E.F.ready2 ? 'Lass uns noch mal üben!' : 'Kannst du mir seine Argumentationstricks beibringen?' });
-    opts.push({ id: 'code', text: 'Kennst du seine Passwörter oder Codes?' });
+    if (E.F.sawBurg && !E.F.knowsCode) opts.push({ id: 'code', text: 'Die Turmtür hat ein Zahlenschloss. Kennst du seine Codes?' });
     opts.push({ id: 'bye', text: 'Bis später, Glanzi.' });
     const c = await E.choose(opts);
     await E.say('kai', opts.find((o) => o.id === c).text);
@@ -594,12 +595,11 @@ async function talkKarl2(E) {
     ]);
   }
   for (;;) {
-    const opts = [
-      { id: 'laden', text: 'Kannst du mein Funkgerät aufladen?' },
-      { id: 'glanz', text: 'Wo ist dein Besitzer hin?' },
-      { id: 'tauben', text: 'Was ist mit den Tauben los?' },
-      { id: 'bye', text: 'Halt die Ohren steif, KARL.' },
-    ];
+    const opts = [];
+    if (E.F.hfgTaken && E.has('funkgeraet')) opts.push({ id: 'laden', text: 'Kannst du mein Funkgerät aufladen?' });
+    opts.push({ id: 'glanz', text: 'Wo ist dein Besitzer hin?' });
+    opts.push({ id: 'tauben', text: 'Was ist mit den Tauben los?' });
+    opts.push({ id: 'bye', text: 'Halt die Ohren steif, KARL.' });
     const c = await E.choose(opts);
     await E.say('kai', opts.find((o) => o.id === c).text);
     if (c === 'bye') return E.say('karl', 'Ich habe keine Ohren. Aber danke. Ich halte meine Scheinwerfer steif.');

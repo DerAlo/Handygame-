@@ -485,6 +485,23 @@ export class Engine {
     }
     FG[id]?.(ctx, this.t);
     ctx.restore();
+    // Vergangenheit: warmer Sepia-Look mit Vignette
+    if (this.scene().tint === 'past') {
+      ctx.save();
+      ctx.globalCompositeOperation = 'soft-light';
+      ctx.fillStyle = 'rgba(214,150,70,0.75)';
+      ctx.fillRect(0, 0, W, H);
+      ctx.globalCompositeOperation = 'source-over';
+      if (!this.vignette) {
+        const g = ctx.createRadialGradient(W / 2, H / 2, H * 0.45, W / 2, H / 2, W * 0.62);
+        g.addColorStop(0, 'rgba(60,30,0,0)');
+        g.addColorStop(1, 'rgba(60,30,0,0.45)');
+        this.vignette = g;
+      }
+      ctx.fillStyle = this.vignette;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
     if (this.reveal > 0) {
       ctx.save();
       ctx.globalAlpha = Math.min(1, this.reveal);

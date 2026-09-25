@@ -1,5 +1,5 @@
 // Hintergründe der Szenen – Pixel-Art per Code, 320x200.
-import { drawCat, drawQBox, drawCar, drawProMax, drawPigeon } from './sprites.js';
+import { drawCat, drawQBox, drawCar, drawProMax, drawPigeon, drawPortal, drawCage } from './sprites.js';
 
 export const W = 320, H = 200;
 
@@ -165,15 +165,23 @@ export const BG = {
     text('QSL', 238, 42, '#e0c090', 5);
   },
 
-  bruecke(ctx) {
+  bruecke(ctx, o = {}) {
     const { R, dith, bands, text } = tools(ctx);
-    bands(0, 0, W, 110, ['#070b1e', '#0b1128', '#101736', '#171c44', '#22204e', '#2c2456']);
-    stars(ctx, 42, 70, 0, 70);
-    moon(ctx, 44, 20, 8, '#070b1e');
+    if (o.day) {
+      bands(0, 0, W, 110, ['#8ec4ea', '#a2d0ee', '#b8dcf0', '#cde6f2', '#e2eef0', '#f0eedc']);
+      ctx.fillStyle = 'rgba(255,250,210,0.35)'; ctx.beginPath(); ctx.arc(46, 20, 12, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = '#fff7d0'; ctx.beginPath(); ctx.arc(46, 20, 8, 0, Math.PI * 2); ctx.fill();
+    } else {
+      bands(0, 0, W, 110, ['#070b1e', '#0b1128', '#101736', '#171c44', '#22204e', '#2c2456']);
+      stars(ctx, 42, 70, 0, 70);
+      moon(ctx, 44, 20, 8, '#070b1e');
+    }
     // gegenüberliegendes Ufer
-    R('#0c0e1e', 0, 92, W, 24);
-    for (let x = 0; x < 200; x += 16) R('#0c0e1e', x, 86 - ((x * 7) % 11), 14, 10);
-    R('#f0c060', 20, 98, 2, 2); R('#f0c060', 60, 96, 2, 2); R('#f0c060', 110, 100, 2, 2);
+    const bank = o.day ? '#6a8a58' : '#0c0e1e';
+    R(bank, 0, 92, W, 24);
+    for (let x = 0; x < 200; x += 16) R(bank, x, 86 - ((x * 7) % 11), 14, 10);
+    if (o.day) for (let x = 6; x < 200; x += 16) R('#4a6a3a', x, 90 - ((x * 7) % 11), 6, 4);
+    else { R('#f0c060', 20, 98, 2, 2); R('#f0c060', 60, 96, 2, 2); R('#f0c060', 110, 100, 2, 2); }
     // Brucktor
     R('#3a2a3a', 226, 16, 62, 110); R('#4a3848', 230, 20, 54, 106);
     R('#6a2a2a', 222, 8, 70, 12); R('#7a3434', 226, 4, 62, 6); R('#8a3a3a', 236, 0, 42, 5);
@@ -199,10 +207,13 @@ export const BG = {
     R('#2a1a14', 30, 60, 96, 18); text('INN-KEBAB', 78, 66, '#ffd060', 9); text('24h · seit 1998', 78, 74, '#ff9a50', 5);
   },
 
-  platz(ctx) {
+  platz(ctx, o = {}) {
     const { R, dith, bands, text } = tools(ctx);
-    bands(0, 0, W, 120, ['#0a0e26', '#10163a', '#1a1e4a', '#2a2658', '#40306a', '#5a3a70']);
-    stars(ctx, 99, 40, 0, 40);
+    if (o.day) bands(0, 0, W, 120, ['#8ec4ea', '#a2d0ee', '#b8dcf0', '#cde6f2', '#e2eef0', '#f0eedc']);
+    else {
+      bands(0, 0, W, 120, ['#0a0e26', '#10163a', '#1a1e4a', '#2a2658', '#40306a', '#5a3a70']);
+      stars(ctx, 99, 40, 0, 40);
+    }
     // Häuser links
     const house = (x, w, h, c, d) => {
       R(d, x, 150 - h, w, h); R(c, x + 1, 150 - h + 1, w - 2, h - 1);
@@ -333,11 +344,11 @@ export const FX = {
     ctx.fillRect(0, 18, W, 90);
     // Brotzeitdose auf dem Putzwagen – leer, sobald genommen
     if (S.flags.brotzeitTaken) R('#e8e8e8', 116, 128, 12, 6);
-    if (S.ch === 2) {
+    if (S.ch === 2 || S.flags.coffeeWorks) {
       // Eimer und Maßband weg?
       if (S.flags.cartTaken) { R('#665e54', 108, 142, 16, 14); R('#555560', 106, 137, 2, 20); }
       // Der Kaffeeautomat funktioniert (!)
-      if (!S.flags.coffeeBroken) {
+      if ((S.ch === 2 && !S.flags.coffeeBroken) || S.flags.coffeeWorks) {
         R('#3aff7a', 229, 104, 2, 2);
         ctx.fillStyle = 'rgba(255,220,150,0.5)'; ctx.fillRect(213, 86, 16, 12);
         for (let i = 0; i < 3; i++) {
@@ -366,10 +377,15 @@ export const FX = {
     // Karton mit Katze
     R('#9a7040', 250, 150, 30, 20); R('#b88a50', 250, 150, 30, 3); R('#7a5a30', 248, 147, 6, 5); R('#7a5a30', 276, 147, 6, 5);
     if (!S.flags.catOut) drawCat(ctx, 262, 153, t, true);
-    else if (S.ch === 2) drawCat(ctx, 158, 92, t, false);
+    else if (S.ch === 2 || (S.ch === 3 && !S.flags.catGone)) drawCat(ctx, 158, 92, t, false);
+    else if (S.ch === 3) { if (S.flags.catBack) drawCat(ctx, 158, 92, t, true); }
     else drawCat(ctx, 106, 172, t, false);
     if (S.flags.catOut && !S.flags.karteTaken) { R('#e8e8f0', 258, 146, 10, 6); R('#3a6ea8', 258, 146, 10, 2); }
     if (S.flags.catOut && S.ch !== 2) { R('#d09040', 112, 170, 6, 2); }
+    if (S.ch === 3) {
+      drawProMax(ctx, 186, 142, t, !S.flags.boxesOff);
+      if (S.flags.portalOpen && !S.flags.portalClosed) drawPortal(ctx, 110, 150, t, 1.2);
+    }
     if (S.ch === 2) {
       const { text } = tools(ctx);
       R('#f2f4f6', 150, 66, 45, 10);
@@ -499,4 +515,147 @@ export function drawCounter(ctx) {
   R('#8a5a3a', 30, 126, 96, 6); R('#a87050', 30, 126, 96, 2);
   R('#5a3a28', 32, 132, 92, 18);
   R('#c0a060', 44, 134, 18, 10); text('Döner 7,50', 53, 139, '#3a2a1a', 3);
+}
+
+// ================= 1524 =================
+const PLANK = (R, y0, y1) => { for (let y = y0; y < y1; y += 6) { R((y / 6) % 2 ? '#6a4a2a' : '#5e4024', 0, y, W, 6); for (let x = ((y / 6) % 3) * 23; x < W; x += 70) R('#4a3218', x, y, 1, 6); } };
+
+BG.huette = (ctx) => {
+  const { R, dith, bands, text } = tools(ctx);
+  // Fachwerkwände
+  R('#d8c8a0', 0, 0, W, 150);
+  for (let i = 0; i < 400; i++) { ctx.fillStyle = 'rgba(120,90,50,0.12)'; ctx.fillRect((i * 97) % W, (i * 53) % 150, 2, 1); }
+  R('#4a2e18', 0, 0, W, 10); R('#4a2e18', 0, 60, W, 6); R('#4a2e18', 0, 140, W, 10);
+  for (const x of [0, 70, 150, 230, 312]) R('#4a2e18', x, 0, 8, 150);
+  ctx.strokeStyle = '#4a2e18'; ctx.lineWidth = 5;
+  ctx.beginPath(); ctx.moveTo(78, 66); ctx.lineTo(150, 140); ctx.moveTo(158, 140); ctx.lineTo(230, 66); ctx.stroke();
+  // Fenster mit Tageslicht
+  R('#4a2e18', 176, 16, 40, 38); bands(180, 20, 32, 30, ['#a8d4f0', '#c8e4f0', '#e8f0e0']); R('#4a2e18', 195, 20, 2, 30); R('#4a2e18', 180, 34, 32, 2);
+  // Tür links
+  R('#2a1a0e', 10, 64, 44, 78); R('#6a4424', 14, 68, 36, 74); for (let x = 18; x < 48; x += 8) R('#5a3a1e', x, 68, 1, 74); R('#2a2a2a', 42, 104, 4, 4);
+  // Kräuterbündel am Balken
+  for (let i = 0; i < 7; i++) { const x = 90 + i * 26; R('#6a4a2a', x + 3, 10, 1, 8); R(['#6a8a3a', '#8a9a4a', '#a07a5a', '#5a7a3a'][i % 4], x, 18, 7, 12); R('#4a6a2a', x + 1, 28, 5, 4); }
+  // Regal mit Tiegeln
+  R('#5a3a1e', 240, 70, 64, 4); R('#5a3a1e', 240, 100, 64, 4);
+  const jar = (x, y, c) => { R('#8a7a60', x, y - 12, 10, 12); R(c, x + 1, y - 9, 8, 8); R('#6a5a40', x + 2, y - 14, 6, 2); };
+  jar(244, 70, '#6a3a6a'); jar(258, 70, '#3a6a4a'); jar(272, 70, '#a06a2a'); jar(288, 70, '#3a4a8a');
+  jar(246, 100, '#8a2a2a'); jar(262, 100, '#a0a040'); jar(280, 100, '#5a8a8a');
+  // Tisch mit Mörser und Buch
+  R('#5a3a1e', 90, 118, 80, 5); R('#4a2e18', 94, 123, 4, 20); R('#4a2e18', 162, 123, 4, 20);
+  R('#8a8a80', 100, 110, 12, 8); R('#6a6a60', 102, 108, 8, 2); R('#a07a4a', 108, 104, 2, 8);
+  R('#6a2a1a', 140, 112, 18, 6); R('#e8dcb0', 141, 111, 16, 2);
+  // Kamin rechts unten
+  R('#6a5a4a', 268, 112, 44, 38); R('#1a1010', 276, 122, 28, 28); R('#8a7a6a', 264, 108, 52, 6);
+  // Boden
+  PLANK(R, 150, H);
+};
+
+BG.bruecke1524 = (ctx) => {
+  BG.bruecke(ctx, { day: true });
+  const { R, text } = tools(ctx);
+  // Kebabstand -> Kahve-Stand
+  R('#6a4a2a', 26, 56, 108, 36); R('#5a3a1e', 26, 56, 108, 2); for (let x = 30; x < 134; x += 10) R('#5a3a1e', x, 58, 1, 32);
+  R('#6a4a2a', 30, 90, 96, 60); R('#8a6a3a', 32, 92, 92, 36); R('#3a2a1a', 36, 96, 84, 30);
+  for (let i = 0; i < 12; i++) R(i % 2 ? '#f0ead8' : '#2a5a8a', 26 + i * 9, 78, 9, 10);
+  R('#1a3a60', 26, 88, 108, 2);
+  R('#e8dcb0', 44, 62, 70, 14); R('#6a4a2a', 44, 62, 70, 1); text('KAHVE', 79, 69, '#6a2a1a', 9);
+  // Kupferkanne statt Spieß
+  R('#c87a3a', 92, 108, 14, 16); R('#e89a5a', 94, 106, 10, 3); R('#c87a3a', 106, 110, 6, 2); R('#8a5a2a', 90, 112, 2, 8);
+  // Laterne -> Fackel
+  R('#b8dcf0', 170, 54, 16, 8); R('#cde6f2', 170, 62, 16, 6); R('#5a3a1a', 176, 64, 3, 86); R('#3a2a1a', 174, 60, 7, 5);
+  // Holzgeländer
+  R('#6a4a2a', 0, 132, W, 3); R('#4a3218', 0, 146, W, 2);
+  for (let x = 4; x < W; x += 12) R('#5a3a1e', x, 135, 3, 11);
+  // Holzbrücke
+  PLANK(R, 148, H);
+  // Salzschiff (Plätte) auf dem Inn
+  R('#5a3a1e', 186, 124, 40, 6); R('#6a4a2a', 190, 122, 34, 2); R('#8a6a4a', 196, 116, 8, 6); R('#8a6a4a', 208, 116, 8, 6); R('#f0f0f0', 198, 114, 4, 2); R('#f0f0f0', 210, 114, 4, 2);
+};
+
+BG.platz1524 = (ctx) => {
+  BG.platz(ctx, { day: true });
+  const { R, text } = tools(ctx);
+  // Fensterlicht aus, Banner weg
+  ctx.fillStyle = 'rgba(90,100,120,0.55)';
+  for (let row = 0; row < 3; row++) for (let i = 0; i < 5; i++) ctx.fillRect(112 + i * 24, 47 + row * 22, 8, 10);
+  R('#e4d4b0', 150, 90, 32, 10); R('#e4d4b0', 116, 103, 98, 14);
+  text('RATHAUS · ANNO 1524', 165, 110, '#6a4a2a', 5);
+  // Pranger
+  R('#5a3a1e', 40, 150, 50, 6); R('#4a2e18', 62, 96, 5, 56); R('#6a4a2a', 50, 108, 30, 5);
+  R('#1a1a1a', 56, 110, 3, 3); R('#1a1a1a', 64, 110, 3, 3); R('#1a1a1a', 72, 110, 3, 3);
+  // Amulettstand von Sigmund
+  R('#6a4a2a', 236, 128, 50, 26); R('#a02a3a', 232, 118, 58, 10); for (let i = 0; i < 6; i++) R(i % 2 ? '#e8c860' : '#a02a3a', 232 + i * 10, 118, 10, 4);
+  R('#e8dcb0', 238, 104, 46, 12); text('AMULETTE!', 261, 110, '#a02a3a', 6);
+  for (let i = 0; i < 5; i++) { R('#6a7a8a', 240 + i * 9, 130, 5, 6); R('#e03040', 241 + i * 9, 132, 3, 2); }
+};
+
+// Schreibpult – wird direkt nach dem Stadtschreiber gezeichnet
+export function drawDesk(ctx) {
+  const { R } = tools(ctx);
+  R('#5a3a1e', 108, 142, 34, 5); R('#4a2e18', 110, 147, 3, 12); R('#4a2e18', 138, 147, 3, 12); R('#5a3a1e', 111, 147, 29, 9);
+  R('#e8dcb0', 114, 139, 14, 4); R('#1a1a1a', 132, 138, 4, 4); R('#f4f4f4', 134, 130, 1, 8);
+}
+
+BG.saal1524 = (ctx) => {
+  BG.saal(ctx);
+  const { R, text } = tools(ctx);
+  // Leinwand -> Wandteppich
+  R('#3a2418', 94, 24, 132, 80); R('#7a1a22', 98, 28, 124, 72);
+  R('#caa040', 98, 28, 124, 3); R('#caa040', 98, 97, 124, 3); for (let x = 102; x < 222; x += 8) R('#caa040', x, 32, 3, 2);
+  // Wappenschild mit Wellen
+  R('#e8e0d0', 144, 40, 32, 36); R('#e8e0d0', 148, 76, 24, 6); R('#e8e0d0', 154, 82, 12, 4);
+  for (let y = 52; y < 72; y += 8) for (let x = 146; x < 174; x += 8) { R('#2a5aa0', x, y, 4, 2); R('#2a5aa0', x + 4, y + 2, 4, 2); }
+  text('WASSERBURG', 160, 92, '#caa040', 5);
+  // Richtertisch statt Rednerpult
+  R('#34251f', 214, 90, 40, 30);
+  R('#3a2418', 196, 104, 110, 4); R('#1a3a2a', 196, 108, 110, 12); R('#caa040', 196, 108, 110, 1);
+};
+
+FX.huette = (ctx, t, S) => {
+  const { R, glow } = tools(ctx);
+  // Kaminfeuer
+  for (let i = 0; i < 5; i++) { const h = 8 + Math.sin(t * 9 + i * 2) * 4; R(i % 2 ? '#ffb030' : '#ff6020', 280 + i * 4, 150 - h, 4, h); }
+  glow(290, 138, 30, 'rgba(255,150,60,A)', 0.25 + 0.05 * Math.sin(t * 7));
+  glow(196, 35, 40, 'rgba(255,250,220,A)', 0.2);
+  if (!S.flags.kerzeTaken) { R('#f0e0a0', 128, 106, 4, 12); R('#ffb030', 129, 102 + Math.round(Math.sin(t * 8)), 2, 4); glow(130, 104, 12, 'rgba(255,200,100,A)', 0.4); }
+  if (!S.flags.baldrianTaken) { R('#8a6a3a', 292, 94, 8, 6); R('#5a8a3a', 294, 90, 1, 4); R('#5a8a3a', 297, 91, 1, 3); }
+  if (S.flags.zuckerInHut && !S.flags.zuckerTaken) { R('#3a6ea8', 218, 170, 12, 8); R('#f4f4f4', 220, 172, 3, 3); R('#f4f4f4', 225, 172, 3, 3); }
+  if (!S.flags.portalClosed) drawPortal(ctx, 214, 150, t, 1.1);
+};
+
+FX.bruecke1524 = (ctx, t, S) => {
+  const { R, glow } = tools(ctx);
+  for (let i = 0; i < 18; i++) {
+    const x = (i * 37 + t * 10 * (1 + (i % 3))) % W, y = 115 + (i * 13) % 26;
+    ctx.fillStyle = `rgba(255,255,255,${0.25 + 0.2 * Math.sin(t * 3 + i)})`;
+    ctx.fillRect(x, y, 4 + (i % 3) * 2, 1);
+  }
+  for (let i = 0; i < 4; i++) { const h = 5 + Math.sin(t * 10 + i) * 2; R(i % 2 ? '#ffb030' : '#ff6020', 174 + i * 2, 60 - h, 2, h); }
+  // Dampf aus der Kanne
+  for (let i = 0; i < 3; i++) { const k = (t * 0.6 + i / 3) % 1; ctx.fillStyle = `rgba(255,255,255,${0.6 * (1 - k)})`; ctx.fillRect(98 + Math.sin(t * 2 + i) * 2, 104 - k * 16, 2, 2); }
+};
+
+FX.platz1524 = (ctx, t, S) => {
+  if (!S.flags.trialStarted) drawCage(ctx, 65, 108, t, S.flags.catCalm ? 'happy' : 'angry');
+  if (S.ch === 3) { drawPigeon(ctx, 150, 188, t, 0); drawPigeon(ctx, 170, 184, t, 1); }
+};
+
+FX.saal1524 = (ctx, t, S) => {
+  if (!S.flags.catFree) drawCage(ctx, 214, 104, t, S.flags.catCalm ? 'happy' : 'angry');
+};
+
+FG.saal1524 = FG.saal;
+
+// Tresen am Kahve-Stand (nur vor Mehmed)
+export function drawCounter1524(ctx) {
+  const { R } = tools(ctx);
+  R('#6a4a2a', 30, 126, 96, 6); R('#8a6a3a', 30, 126, 96, 2);
+  R('#5a3a1e', 32, 132, 92, 18);
+  for (let x = 36; x < 120; x += 12) R('#4a2e18', x, 132, 1, 18);
+}
+
+// Richtertisch vor dem Ratsherrn
+export function drawBench(ctx) {
+  const { R } = tools(ctx);
+  R('#3a2418', 196, 104, 110, 4); R('#1a3a2a', 196, 108, 110, 12); R('#caa040', 196, 108, 110, 1);
 }

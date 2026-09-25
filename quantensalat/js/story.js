@@ -4,6 +4,7 @@ import { audio } from './audio.js';
 import { drawCounter } from './art.js';
 import { trainingDuel, finalDuel, RETORTS } from './duel.js';
 import { chapter2, newState2, combine2, itemUse2, itemLook2, hint2 } from './story2.js';
+import { chapter3, newState3, combine3, itemUse3, itemLook3, hint3 } from './story3.js';
 
 const C = { kai: '#ffffff', prof: '#d7b4ff', mehmet: '#ffc864', glanz: '#7fe3ff', guard: '#ff9f9f', karl: '#9dff9d', radio: '#ffe89a' };
 
@@ -417,10 +418,11 @@ async function talkProf(E) {
       opts.push({ id: 'box', text: 'Was ist diese Q-Box?' });
       opts.push({ id: 'help', text: 'Wie kann ich Ihnen helfen?' });
     } else {
-      opts.push({ id: 'out', text: 'Wie komme ich hier raus? Alles ist verriegelt!' });
-      opts.push({ id: 'gipfel', text: 'Wie komme ich auf den Gipfel?' });
-      opts.push({ id: 'duell', text: 'Was ist das Peer-Review-Duell?' });
-      opts.push({ id: 'mehmet', text: 'Wo finde ich Mehmet?' });
+      // Nur Themen anbieten, die Kai schon kennt und die noch offen sind
+      if (!F.lockdownOff) opts.push({ id: 'out', text: 'Wie komme ich hier raus? Alles ist verriegelt!' });
+      if (F.toldPlan && !F.disguised && !E.has('verkleidung')) opts.push({ id: 'gipfel', text: 'Wie komme ich auf den Gipfel?' });
+      if (F.toldPlan && !E.has('zertifikat')) opts.push({ id: 'duell', text: 'Was ist das Peer-Review-Duell?' });
+      if (F.toldPlan && !F.metMehmet) opts.push({ id: 'mehmet', text: 'Wo finde ich Mehmet?' });
     }
     opts.push({ id: 'bye', text: 'Ich kümmere mich drum!' });
     const c = await E.choose(opts);
@@ -776,6 +778,7 @@ async function finale(E) {
 const DIS = ['kittel', 'brille', 'moppkopf'];
 export function combine(E, a, b) {
   if (E.S.ch === 2) return combine2(E, a, b);
+  if (E.S.ch === 3) return combine3(E, a, b);
   const pair = [a, b].sort().join('+');
   if (pair === 'handy+stativ') {
     E.removeItem('handy'); E.removeItem('stativ'); E.addItem('handystativ');
@@ -807,6 +810,7 @@ export function combine(E, a, b) {
 
 export function itemLook(E, id) {
   if (E.S.ch === 2) return itemLook2(E, id);
+  if (E.S.ch === 3) return itemLook3(E, id);
   if (id === 'verkleidungTeil') {
     const have = E.F.dparts || [];
     const miss = DIS.filter((d) => !have.includes(d)).map((d) => ({ kittel: 'ein Kittel', brille: 'eine Brille', moppkopf: 'graue Haare' })[d]);
@@ -820,6 +824,7 @@ export function itemLook(E, id) {
 // ---------- Tipps ----------
 export function hint(E) {
   if (E.S.ch === 2) return hint2(E);
+  if (E.S.ch === 3) return hint3(E);
   const F = E.F, S = E.S;
   if (!F.sawProf) return 'Im Labor hat es geknallt. Schau nach, was dort los ist!';
   if (F.won && !F.profBack) return 'Benutze die Q-Box mit der Frau Professor.';
@@ -850,19 +855,21 @@ export function hint(E) {
 }
 
 // ---------- Kapitel & Zustand ----------
-Object.assign(scenes, chapter2(scenes));
+Object.assign(scenes, chapter2(scenes), chapter3(scenes));
 
 export function newState(ch = 1) {
   if (ch === 2) return newState2();
+  if (ch === 3) return newState3();
   return { ch: 1, scene: 'flur', inv: ['mopp', 'handy'], flags: {}, learned: [], kai: { x: 90, y: 172, dir: 1 }, v: 1 };
 }
 
 export function kaiSprite(S) {
   if (S.flags.disguised) return 'kaiDisguise';
-  return S.ch === 2 ? 'kaiPhd' : 'kai';
+  return S.ch >= 2 ? 'kaiPhd' : 'kai';
 }
 
 export function itemUse(E, id) {
   if (E.S.ch === 2) return itemUse2(E, id);
+  if (E.S.ch === 3) return itemUse3(E, id);
   return null;
 }

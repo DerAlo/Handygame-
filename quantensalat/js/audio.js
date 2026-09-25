@@ -74,6 +74,19 @@ export const SONGS = {
     bass: seq('A1 A2 A1 A2 A1 A2 A1 A2 F1 F2 F1 F2 G1 G2 G1 G2 A1 A2 A1 A2 A1 A2 A1 A2 D2 D3 D2 D3 E2 E3 E2 E3'),
     wave: 'square', leadVol: 0.04,
   },
+  mittelalter: {
+    bpm: 104,
+    // Tanzweise im Stil der Renaissance
+    lead: seq('D5 . A4 . D5 E5 F5 . E5 D5 C5 . A4 . . . C5 . G4 . C5 D5 E5 . D5 C5 A#4 . A4 . . . D5 . F5 . E5 D5 C5 . A4 . C5 . D5 . . . F5 E5 D5 C5 A4 . G4 . A4 . D4 . D4 . . .'),
+    bass: seq('D2 . A2 . C2 . G2 . A#1 . F2 . A1 . E2 . D2 . A2 . C2 . G2 . A#1 . C2 . D2 . . .'),
+    wave: 'triangle',
+  },
+  huette: {
+    bpm: 70,
+    lead: seq('A4 - C5 - D5 - E5 - D5 - C5 - A4 - - - G4 - A4 - C5 - D5 - C5 - A4 - G4 - - - E4 - G4 - A4 - C5 - A4 - G4 - E4 - - - D4 - E4 - G4 - A4 - - - - - - -'),
+    bass: seq('A1 . E2 . A1 . E2 . G1 . D2 . G1 . D2 . C2 . G2 . C2 . G2 . D2 . A2 . A1 . . .'),
+    wave: 'triangle',
+  },
   ende: {
     bpm: 120,
     lead: seq('C5 E5 G5 C6 - - B5 G5 A5 - F5 - G5 - - - E5 G5 C6 E6 - - D6 C6 B5 - G5 - C6 - - - A5 - C6 - F6 - E6 - D6 - B5 - G5 - - - C6 - - - G5 - E5 - C6 - - - - - - -'),

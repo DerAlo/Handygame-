@@ -223,4 +223,5 @@ h2 { margin: 0 0 10px; }
 .credits b { color: var(--ink); }
 
 .btn.ch2 { background: linear-gradient(#ff9ad0, #e0508a); color: #2a0014; box-shadow: 0 4px 0 #8a2050; font-size: 17px; }
-.btn.ch2 small { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: #2a0014; color: #ffd35a; font-size: 11px; vertical-align: middle; }
+.btn.ch3 { background: linear-gradient(#e8c890, #b8864a); color: #2a1400; box-shadow: 0 4px 0 #6a4a1a; font-size: 17px; }
+.btn.ch3 small, .btn.ch2 small { display: inline-block; margin-left: 6px; padding: 1px 6px; border-radius: 6px; background: #2a0014; color: #ffd35a; font-size: 11px; vertical-align: middle; }

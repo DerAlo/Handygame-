@@ -89,6 +89,50 @@ export const RETORTS2 = {
   },
 };
 
+// Kapitel 3: Mehmed Efendi trainiert, Sigmund von Glanz klagt vor dem Rat an
+export const RETORTS3 = {
+  posthoc: {
+    retort: 'Danach heißt nicht deswegen. Milch wird im Sommer von ganz allein sauer.',
+    train: 'Seit der Komet am Himmel stand, hat mein Esel Blähungen. Der Komet ist schuld!',
+    final: 'Seit die schwarze Katze da ist, wird meine Milch sauer! Also hat SIE sie verhext!',
+  },
+  beweislast: {
+    retort: 'Wer etwas behauptet, muss es beweisen. Nicht der andere das Gegenteil.',
+    train: 'Beweist mir doch, dass in meinem Keller KEIN Drache wohnt!',
+    final: 'Dann beweist doch, dass die Katze KEIN Dämon ist! Na? Könnt Ihr nicht!',
+  },
+  person: {
+    retort: 'Mein Gewand ändert nichts an meinem Argument. Streitet mit dem Argument, nicht mit der Person.',
+    train: 'Hört nicht auf den Bader! Der hat ja nicht mal einen ordentlichen Hut!',
+    final: 'Hört nicht auf diesen Fremden! Seht nur, wie seltsam er gekleidet ist – ganz in Weiß!',
+  },
+  zirkel: {
+    retort: 'Das ist ein Zirkelschluss. Ihr setzt voraus, was Ihr beweisen wollt.',
+    train: 'Die Heilige Schrift meines Vetters ist wahr, denn es steht in der Schrift meines Vetters!',
+    final: 'Die Katze ist ein Dämon, weil sie schwarz ist. Und sie ist schwarz, weil sie ein Dämon ist!',
+  },
+  tradition: {
+    retort: 'Alt heißt nicht wahr. Auch ein alter Irrtum bleibt ein Irrtum.',
+    train: 'Aderlass hilft gegen alles! Das machen wir schon seit tausend Jahren so!',
+    final: 'Schwarze Katzen bringen Unglück! Das weiß man schon seit Urgroßvaters Zeiten!',
+  },
+  bestaetigung: {
+    retort: 'Ihr merkt Euch nur die Treffer und vergesst die Fehlschläge. Das ist Selbsttäuschung.',
+    train: 'Immer wenn ich mir ein Wunder wünsche und es passiert, schreibe ich es auf. Mein Buch ist voll!',
+    final: 'Jedes Mal, wenn mein Glücksamulett geholfen hat, habe ich es mir gemerkt! Es hilft also IMMER!',
+  },
+  dammbruch: {
+    retort: 'Von einer Katze bis zum Weltuntergang? Jeder Schritt dazwischen fehlt. Das ist Panikmache.',
+    train: 'Wenn wir heute Kartoffeln essen, fressen wir morgen Steine und übermorgen einander!',
+    final: 'Lasst Ihr die Katze frei, fliegen morgen Hexen über den Inn und übermorgen geht die Welt unter!',
+  },
+  unwissen: {
+    retort: 'Dass wir es noch nicht erklären können, beweist gar nichts – außer, dass wir weiterforschen müssen.',
+    train: 'Niemand weiß, warum der Mond nicht runterfällt. Also halten ihn Engel an Schnüren!',
+    final: 'Niemand kann erklären, wie diese Katze vom Himmel fiel! Also war es Zauberei!',
+  },
+};
+
 const DUDS = ['Äh … selber!', 'Das sagt meine Oma auch immer.', 'Ich … hab mein Argument im Bus vergessen.', 'Na und? Ich kann Linoleum polieren!', 'Ihre Mutter ist ein … äh … Quant!'];
 
 const CH = {
@@ -105,6 +149,13 @@ const CH = {
     bad: ['Hm, nein. Da hätte ich mich rausgeredet.', 'Nicht ganz. Ich bin leider sehr glitschig.', 'Das hätte mir nur ein müdes Lächeln entlockt.', 'Knapp daneben!'],
     foeHit: ['Argh! Woher kennen Sie diesen Konter?!', 'Das … war nicht im Podcast!', 'Unmöglich! Ich habe drei Wochen trainiert!', 'Nein! Mein Narrativ!'],
     foeWin: ['Ha! Drei Wochen Podcasts zahlen sich aus!', 'Sprachlos, Wimmer?', 'Disruption schlägt Argument!'],
+  },
+  3: {
+    set: RETORTS3, trainer: 'mehmed', trainerName: 'Mehmed', trainMusic: 'mittelalter', foe: 'sigmund', foeName: 'Sigmund', whisper: 'mehmed', whisperText: '(flüstert aus dem Volk) Sagt:',
+    good: ['Maşallah! Treffend wie ein Pfeil.', 'Aristoteles würde Euch umarmen.', 'Gut! Sehr gut!', 'Ha! Ihr denkt wie ein Gelehrter aus Konstantinopel.'],
+    bad: ['Hm, nein, mein Freund.', 'Das überzeugt nicht mal meinen Esel.', 'Zu schwach.', 'Leider daneben.'],
+    foeHit: ['Hmpf! Das … das war Zufall!', 'Ruhe im Saal! Das zählt nicht! … Doch? Mist.', 'Mein Amulett hat versagt!', 'Grr! Woher habt Ihr diese … Logik?!'],
+    foeWin: ['Ha! Das Volk ist auf meiner Seite!', 'Seht Ihr? Der Fremde weiß nichts!', 'Kauft Amulette! Nur heute zwei zum Preis von drei!'],
   },
 };
 
@@ -152,7 +203,7 @@ export async function finalDuel(E, ch = 1) {
   const C = CH[ch], set = C.set;
   let me = 0, them = 0;
   audio.play('duell');
-  setScore(E, me, them, 'Glanz');
+  setScore(E, me, them, C.foeName || 'Glanz');
   const order = shuffle(Object.keys(set));
   let i = 0;
   while (me < 3 && them < 3) {
@@ -170,7 +221,7 @@ export async function finalDuel(E, ch = 1) {
       await E.say(C.whisper, `${C.whisperText} „${set[k].retort}“`);
       E.learn(k);
     }
-    setScore(E, me, them, 'Glanz');
+    setScore(E, me, them, C.foeName || 'Glanz');
   }
   E.setScore('');
   E.duelKey = null;
