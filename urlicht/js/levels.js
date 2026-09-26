@@ -24,7 +24,8 @@ export const LEVELS = [
   // =============================== 1 ===============================
   {
     id: 'ceres', name: 'Ceres-Werft', sub: 'Asteroidengürtel · Sol-System', music: 'ceres', medal: 90,
-    env: { sky: '#05060f', fog: '#0a0c1a', fogNear: 150, fogFar: 330, stars: 1, backdrop: 'ceres', backdropPos: [150, 30], backdropSize: 320, speed: 60 },
+    env: { sky: '#05060f', fog: '#0a0c1a', fogNear: 150, fogFar: 330, stars: 1, backdrop: 'ceres', backdropPos: [300, 150], backdropSize: 360, speed: 60,
+      nebula: ['#2a3a8a', '#6a2a7a', '#1a6a8a'], envMap: { top: '#c0d0f0', mid: '#4a5a8a', accent: '#7a4ab0', accent2: '#2a7ab0' } },
     briefing: [
       ['tessaro', 'Hier spricht Admiralin Tessaro, Arche-Flotte. An alle Schiffe im Ceres-Sektor: Die Werft wird angegriffen!'],
       ['tessaro', 'Kurierschiff LUMEN, Sie sind am nächsten dran. Wer fliegt da?'],
@@ -38,7 +39,7 @@ export const LEVELS = [
     events: L(
       [0.5, 'tip', { text: 'Linke Bildschirmhälfte: STEUERN' }],
       [3, 'wave', { kind: 'drone', form: 'line', n: 5, y: 0 }],
-      [5, 'tip', { text: 'Der Laser feuert automatisch.  FEUER halten = Ladeschuss, loslassen = zielsuchend!' }],
+      [5, 'tip', { text: 'FEUER tippen = Laser.  FEUER halten = Ladeschuss, loslassen = zielsuchend!' }],
       [7, 'wave', { kind: 'drone', form: 'vee', n: 5 }],
       [9, 'decor', { kind: 'structure', n: 3 }],
       [10, 'decor', { kind: 'girder', x: -8, y: -2, len: 40 }],
@@ -81,7 +82,8 @@ export const LEVELS = [
     ),
     outro: [
       ['mira', 'Juno … die Trümmer. Sie zerfallen nicht. Sie hören einfach auf zu existieren.'],
-      ['mira', 'Das sind keine Maschinen. Das ist Vakuum. Leerer Raum in perfekter Ordnung.'],
+      ['mira', 'Sie sehen aus wie Schiffe. Aber sie sind hohl – Kopien von Schiffen, die sie irgendwo gesehen haben. Echos eben.'],
+      ['mira', 'Innen drin ist nur Vakuum. Leerer Raum in perfekter Ordnung.'],
       ['brakk', 'Ich hab schon Asteroiden gesprengt, die mehr Persönlichkeit hatten.'],
       ['tessaro', 'Gute Arbeit, LUMEN. Aber wir haben ein größeres Problem. Das Tiefenohr auf Tethys meldet Angriffe.'],
       ['mira', 'Das Tiefenohr! Das größte Radioteleskop im Sonnensystem. Es lauscht der kosmischen Hintergrundstrahlung – dem ältesten Licht des Universums.'],
@@ -93,7 +95,8 @@ export const LEVELS = [
   // =============================== 2 ===============================
   {
     id: 'tethys', name: 'Eismond Tethys', sub: 'Saturn-System', music: 'tethys', medal: 95,
-    env: { sky: '#0a1024', fog: '#1a2a4a', fogNear: 100, fogFar: 280, stars: 0.8, ground: '#e0f4ff', groundY: -8, backdrop: 'saturn', backdropPos: [-140, 110], backdropSize: 420, speed: 62, light: '#d0e8ff' },
+    env: { sky: '#0a1024', fog: '#1a2a4a', fogNear: 100, fogFar: 280, stars: 0.8, ground: '#e0f4ff', groundY: -8, backdrop: 'saturn', backdropPos: [-140, 110], backdropSize: 420, speed: 62, light: '#d0e8ff',
+      nebula: ['#3a5aaa', '#2a3a7a', '#5a4a9a'], nebulaGlow: 0.8, envMap: { top: '#e0f0ff', mid: '#8ab0d8', horizon: '#c0dcf0', bottom: '#6a8aa8', accent: '#9ad0ff' } },
     briefing: [
       ['mira', 'Tethys. Ein Eismond mit gut tausend Kilometern Durchmesser. Unter dem Eis: das Tiefenohr.'],
       ['tessaro', 'Die Echos wollen die Antenne zerstören. Sichern Sie die Daten, bevor es zu spät ist.'],
@@ -156,7 +159,8 @@ export const LEVELS = [
   // =============================== 3 ===============================
   {
     id: 'aurin', name: 'Aurin-Nebel', sub: 'Sternentstehungsgebiet', music: 'aurin', medal: 95,
-    env: { sky: '#1a0820', fog: '#3a1040', fogNear: 60, fogFar: 230, stars: 0.3, speed: 58, light: '#ffc0e8' },
+    env: { sky: '#1a0820', fog: '#3a1040', fogNear: 60, fogFar: 230, stars: 0.3, speed: 58, light: '#ffc0e8',
+      nebula: ['#c03a8a', '#6a2aa0', '#ff6a4a', '#3a1a8a'], nebulaDensity: 1.8, nebulaGlow: 1.3, skyStars: 0.4, dust: '#12000f', envMap: { top: '#ffc0e0', mid: '#a04a90', horizon: '#6a2060', accent: '#ff7a5a', accent2: '#8a4aff' } },
     briefing: [
       ['mira', 'Der Aurin-Nebel. Eine Wolke aus Gas und Staub, hundert Lichtjahre groß. Hier werden gerade Sterne geboren.'],
       ['mira', 'Im Nebel sind die Sensoren fast blind. Wir fliegen nach Gefühl.'],
@@ -228,7 +232,8 @@ export const LEVELS = [
   // =============================== 4 ===============================
   {
     id: 'licht', name: 'Das Letzte Licht', sub: 'Auf dem ältesten Lichtstrahl', music: 'licht', medal: 110,
-    env: { sky: '#020208', fog: '#050510', fogNear: 160, fogFar: 380, stars: 1, backdrop: 'galaxy', backdropPos: [110, 40], backdropSize: 300, speed: 70, starColor: '#dde6ff' },
+    env: { sky: '#020208', fog: '#050510', fogNear: 160, fogFar: 380, stars: 1, backdrop: 'galaxy', backdropPos: [110, 40], backdropSize: 300, speed: 70, starColor: '#dde6ff',
+      nebula: ['#3a4ab0', '#8a6ad0', '#2a2a6a'], nebulaGlow: 0.9, envMap: { top: '#d0d8ff', mid: '#4a4a9a', accent: '#a08aff' } },
     briefing: [
       ['pip', 'Wir reiten auf meinem Weg zurück. Durch Raum und Zeit. Haltet euch fest.'],
       ['mira', 'Das beobachtbare Universum hat einen Durchmesser von etwa 93 Milliarden Lichtjahren. Wir fliegen gerade durch … alles.'],
@@ -285,7 +290,8 @@ export const LEVELS = [
   // =============================== 5 ===============================
   {
     id: 'urlicht', name: 'Urlicht', sub: 'Der Rand des beobachtbaren Universums', music: 'urlicht', medal: 70, noBrakk: true, fireMul: 0.9,
-    env: { sky: '#c85420', fog: '#e07030', fogNear: 70, fogFar: 260, stars: 0, speed: 60, light: '#ffe0c0' },
+    env: { sky: '#8a3010', fog: '#b04a20', fogNear: 70, fogFar: 260, stars: 0, speed: 60, light: '#ffe0c0',
+      nebula: ['#ff9a40', '#ff6a2a', '#ff4a20', '#ffc070'], nebulaDensity: 1.3, nebulaGlow: 0.9, skyStars: 0, dust: '#3a0800', skyIntensity: 0.8, envMap: { top: '#fff0d0', mid: '#ff9a4a', horizon: '#e06a2a', bottom: '#6a2a10', accent: '#ffe0a0', accent2: '#ff6a3a' } },
     briefing: [
       ['mira', 'Das ist … die Oberfläche der letzten Streuung. Eine Wand aus glühendem Plasma, 3000 Grad heiß. Weiter kann niemand sehen.'],
       ['mira', 'Das ist der Rand des beobachtbaren Universums. Dahinter war alles undurchsichtig. Dahinter … fing alles an.'],

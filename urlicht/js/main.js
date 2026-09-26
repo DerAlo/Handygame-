@@ -10,7 +10,9 @@ const store = {
   get(k, d) { try { const v = localStorage.getItem('urlicht.' + k); return v == null ? d : JSON.parse(v); } catch { return d; } },
   set(k, v) { try { localStorage.setItem('urlicht.' + k, JSON.stringify(v)); } catch {} },
 };
-const settings = Object.assign({ music: true, sfx: true, autofire: true, invertY: false }, store.get('settings', {}));
+const settings = Object.assign({ music: true, sfx: true, autofire: false, invertY: false }, store.get('settings', {}));
+// Ab Version 2 ist Dauerfeuer standardmäßig aus
+if (!settings.v2) { settings.v2 = true; settings.autofire = false; store.set('settings', settings); }
 const progress = Object.assign({ unlocked: 1, best: {}, seenProlog: false }, store.get('progress', {}));
 audio.musicOn = settings.music; audio.sfxOn = settings.sfx;
 ads.init();

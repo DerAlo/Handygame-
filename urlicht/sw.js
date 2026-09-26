@@ -1,6 +1,6 @@
 // Offline-Cache: Spiel lädt sofort und funktioniert ohne Netz.
 // Bei jeder Veröffentlichung VERSION erhöhen, damit Updates ankommen.
-const VERSION = 'urlicht-v1';
+const VERSION = 'urlicht-v2';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/game.js', 'js/models.js', 'js/bosses.js', 'js/levels.js', 'js/audio.js', 'js/three.module.min.js', '../js/ads.js',

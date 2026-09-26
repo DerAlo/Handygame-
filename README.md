@@ -145,4 +145,4 @@ Außerdem: Gesprächsthemen erscheinen jetzt erst, wenn Kai davon wissen kann, u
 
 **Steuerung (Handy):** linke Bildschirmhälfte = virtueller Joystick, rechts FEUER / ROLLE / BOMBE. Tastatur: WASD/Pfeile, Leertaste, Q/E, B, P.
 
-**Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`, damit das Spiel offline läuft). Alles andere selbst gebaut: Low-Poly-Modelle (`models.js`), Endgegner (`bosses.js`), Spielkern mit Partikeln und Kollisionen (`game.js`), Level & Story (`levels.js`), Synth-Musik mit Schlagzeug und Effekte (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.
+**Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`, damit das Spiel offline läuft). Alles andere selbst gebaut: 3D-Modelle mit PBR-Materialien, Nebel-Panoramahimmel und Planeten (`models.js`), Endgegner (`bosses.js`), Spielkern mit Partikeln und Kollisionen (`game.js`), Level & Story (`levels.js`), Synth-Musik mit Schlagzeug und Effekte (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.

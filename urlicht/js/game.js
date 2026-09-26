@@ -23,7 +23,8 @@ export function segDist2(a, b, c) {
 
 // ---------- Punkt-Partikel (ein Draw-Call für viele Punkte) ----------
 class PointPool {
-  constructor(scene, n, size, opacity = 1) {
+  constructor(scene, n, size, opacity = 1, o = {}) {
+    this.fade = o.fade ?? true;
     this.n = n;
     this.pos = new Float32Array(n * 3);
     this.col = new Float32Array(n * 3);
@@ -32,7 +33,7 @@ class PointPool {
     const geo = new THREE.BufferGeometry();
     geo.setAttribute('position', new THREE.BufferAttribute(this.pos, 3));
     geo.setAttribute('color', new THREE.BufferAttribute(this.col, 3));
-    this.mat = new THREE.PointsMaterial({ size, map: M.glowTexture(), vertexColors: true, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
+    this.mat = new THREE.PointsMaterial({ size, map: o.map || M.glowTexture(), vertexColors: true, transparent: true, opacity, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true });
     this.points = new THREE.Points(geo, this.mat);
     this.points.frustumCulled = false;
     scene.add(this.points);
@@ -58,7 +59,7 @@ class PointPool {
         it.v.y -= it.g * dt;
         it.p.addScaledVector(it.v, dt);
         if (it.scroll) it.p.z += scroll * dt * 0.6;
-        const f = it.life / it.max;
+        const f = this.fade ? it.life / it.max : 1;
         this.pos[i * 3] = it.p.x; this.pos[i * 3 + 1] = it.p.y; this.pos[i * 3 + 2] = it.p.z;
         this.col[i * 3] = it.c.r * f; this.col[i * 3 + 1] = it.c.g * f; this.col[i * 3 + 2] = it.c.b * f;
       }
@@ -72,31 +73,43 @@ class PointPool {
 export class Game {
   constructor(canvas, ui) {
     this.ui = ui;
-    this.settings = { autofire: true, invertY: false };
+    this.settings = { autofire: false, invertY: false };
     const touch = 'ontouchstart' in window;
     this.renderer = new THREE.WebGLRenderer({ canvas, antialias: !touch, powerPreference: 'high-performance' });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, touch ? 1.5 : 2));
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    this.renderer.toneMappingExposure = 1.15;
+    this.pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(68, 1, 0.5, 900);
     this.camera.position.set(0, 2.6, 11);
-    this.hemi = new THREE.HemisphereLight('#bcd8ff', '#302030', 1.1);
-    this.sun = new THREE.DirectionalLight('#ffffff', 1.6);
-    this.sun.position.set(-4, 8, 6);
-    this.scene.add(this.hemi, this.sun);
+    this.hemi = new THREE.HemisphereLight('#bcd8ff', '#302030', 0.5);
+    this.sun = new THREE.DirectionalLight('#fff4e6', 2.6);
+    this.sun.position.set(-5, 8, 7);
+    this.rim = new THREE.DirectionalLight('#7fa8ff', 1.4);
+    this.rim.position.set(6, 2, -10);
+    this.scene.add(this.hemi, this.sun, this.rim);
     this.scene.fog = new THREE.Fog('#000000', 120, 320);
 
     // Sternenfeld
-    const N = 1400, sp = new Float32Array(N * 3);
+    const N = 500, sp = new Float32Array(N * 3);
     for (let i = 0; i < N; i++) { sp[i * 3] = rand(-260, 260); sp[i * 3 + 1] = rand(-160, 160); sp[i * 3 + 2] = rand(-700, 20); }
     const sg = new THREE.BufferGeometry(); sg.setAttribute('position', new THREE.BufferAttribute(sp, 3));
-    this.starMat = new THREE.PointsMaterial({ color: '#ffffff', size: 1.3, sizeAttenuation: true, transparent: true, opacity: 1, fog: false, depthWrite: false });
+    this.starMat = new THREE.PointsMaterial({ color: '#ffffff', size: 0.7, sizeAttenuation: true, transparent: true, opacity: 0.6, fog: false, depthWrite: false });
     this.stars = new THREE.Points(sg, this.starMat);
     this.stars.frustumCulled = false;
     this.scene.add(this.stars);
 
-    this.sparks = new PointPool(this.scene, 900, 1.3);
-    this.flashes = new PointPool(this.scene, 60, 9);
-    this.bulletPool = new PointPool(this.scene, 160, 2.8);
+    this.sparks = new PointPool(this.scene, 400, 1.1);
+    this.flashes = new PointPool(this.scene, 40, 8);
+    this.bulletPool = new PointPool(this.scene, 160, 3.4, 1, { map: M.boltTexture(), fade: false });
+    // Explosionen: wachsende Feuerbälle
+    this.blasts = [];
+    for (let i = 0; i < 24; i++) {
+      const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: M.glowTexture(), transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, toneMapped: false }));
+      s.visible = false; this.scene.add(s);
+      this.blasts.push({ s, life: 0, max: 1, size: 1 });
+    }
     this.bullets = [];
 
     // Spielerschiff
@@ -150,12 +163,18 @@ export class Game {
     this.clearWorld();
     const E = level.env;
     this.env = { ...E };
-    this.scene.background = new THREE.Color(E.sky);
+    // Himmel als Panorama und Umgebung für Spiegelungen (pro Level einmal erzeugt)
+    if (!level._sky) level._sky = M.skyTexture({ base: E.sky, nebula: E.nebula, stars: E.skyStars ?? 1, density: E.nebulaDensity ?? 1, glow: E.nebulaGlow ?? 1 });
+    if (!level._env) level._env = this.pmrem.fromEquirectangular(M.envTexture(E.envMap || {})).texture;
+    this.scene.background = level._sky;
+    this.scene.backgroundIntensity = E.skyIntensity ?? 1;
+    this.scene.environment = level._env;
     this.scene.fog.color.set(E.fog);
     this.scene.fog.near = E.fogNear ?? 120; this.scene.fog.far = E.fogFar ?? 320;
     this.starMat.opacity = E.stars ?? 1;
     this.starMat.color.set(E.starColor || '#ffffff');
     this.hemi.color.set(E.light || '#bcd8ff');
+    this.sun.color.set(E.sun || '#fff4e6');
     this.speed = E.speed || 60;
     this.bounds = { x: 13, yMin: -7, yMax: 7 };
     // Boden (Eismond)
@@ -169,13 +188,16 @@ export class Game {
     }
     // Hintergrundbild
     if (this.backdrop) { this.scene.remove(this.backdrop); this.backdrop = null; }
-    if (E.backdrop) {
+    if (E.backdrop === 'saturn' || E.backdrop === 'ceres') {
+      const pl = M.makePlanet(E.backdrop, (E.backdropSize || 260) * 0.36);
+      pl.position.set(E.backdropPos?.[0] ?? 120, E.backdropPos?.[1] ?? 60, -760);
+      this.backdrop = pl; this.scene.add(pl);
+    } else if (E.backdrop) {
       const s = new THREE.Sprite(new THREE.SpriteMaterial({ map: M.backdropTexture(E.backdrop), fog: false, transparent: true, depthWrite: false, opacity: E.backdropOpacity ?? 1 }));
       s.scale.set(E.backdropSize || 260, E.backdropSize || 260, 1);
       s.position.set(E.backdropPos?.[0] ?? 120, E.backdropPos?.[1] ?? 60, -760);
       this.backdrop = s; this.scene.add(s);
     }
-    this.renderer.setClearColor(E.sky);
     // Spielerzustand
     if (!fromCheckpoint) this.cp = null;
     const cp = fromCheckpoint ? this.cp : null;
@@ -198,6 +220,7 @@ export class Game {
     this.ship.visible = true;
     this.shakeT = 0;
     this.envAnim = null;
+    this.ui.bossBar?.(null);
     this.ui.hud?.(this);
   }
 
@@ -212,6 +235,7 @@ export class Game {
     this.rings = [];
     this.bullets = [];
     this.bulletPool.clear(); this.sparks.clear(); this.flashes.clear();
+    for (const b of this.blasts) { b.life = 0; b.s.visible = false; }
     if (this.boss) { this.scene.remove(this.boss.root); this.boss = null; }
   }
 
@@ -229,11 +253,11 @@ export class Game {
     const obj = mk();
     obj.position.set(x, y, z);
     const base = {
-      drone: { hp: 1, r: 1.4, score: 10, fire: [2.5, 5] },
-      dart: { hp: 1, r: 1.3, score: 15, fire: null, vz: 40 },
+      drone: { hp: 1, r: 2.4, score: 10, fire: [3.5, 7], ship: true },
+      dart: { hp: 1, r: 1.8, score: 15, fire: null, vz: 40 },
       mine: { hp: 2, r: 1.8, score: 5, fire: null, mine: true },
-      splitter: { hp: 6, r: 2.4, score: 30, fire: [1.8, 3], split: true },
-      turret: { hp: 3, r: 1.8, score: 20, fire: [1.4, 2.6] },
+      splitter: { hp: 6, r: 3.6, score: 30, fire: [2.6, 4.2], split: true, ship: true },
+      turret: { hp: 3, r: 1.8, score: 20, fire: [2.2, 3.6] },
     }[kind];
     const e = this.addEnt({ kind, obj, enemy: true, ...base, bx: x, by: y, vz: base.vz || 0, ...opts });
     if (e.fire) e.fireT = rand(e.fire[0] * 0.4, e.fire[1]);
@@ -248,8 +272,8 @@ export class Game {
       const k = i - (n - 1) / 2;
       let e;
       switch (form) {
-        case 'line': e = this.spawnEnemy(kind, x + k * 4.5, y, SPAWN_Z, o); break;
-        case 'vee': e = this.spawnEnemy(kind, x + k * 4, y + Math.abs(k) * 2, SPAWN_Z - Math.abs(k) * 10, o); break;
+        case 'line': e = this.spawnEnemy(kind, x + k * 7, y, SPAWN_Z, o); break;
+        case 'vee': e = this.spawnEnemy(kind, x + k * 6.5, y + Math.abs(k) * 2, SPAWN_Z - Math.abs(k) * 10, o); break;
         case 'column': e = this.spawnEnemy(kind, x, y, SPAWN_Z - i * 14, o); break;
         case 'sine': e = this.spawnEnemy(kind, x, y, SPAWN_Z - i * 12, { ...o, path: (a) => [Math.sin(a * 1.6 + i * 0.5) * 9, Math.cos(a * 1.1 + i) * 2] }); break;
         case 'swoopL': case 'swoopR': {
@@ -258,7 +282,7 @@ export class Game {
           break;
         }
         case 'spiral': e = this.spawnEnemy(kind, x, y, SPAWN_Z - i * 6, { ...o, path: (a) => { const r = Math.max(2, 10 - a * 1.5); return [Math.cos(a * 2.4 + i * 0.9) * r, Math.sin(a * 2.4 + i * 0.9) * r * 0.6]; } }); break;
-        case 'hover': e = this.spawnEnemy(kind, x + k * 6, y + (i % 2) * 3, SPAWN_Z, { ...o, hoverZ: -55 - (i % 2) * 10, hoverT: o.hoverT ?? 5 }); break;
+        case 'hover': e = this.spawnEnemy(kind, x + k * 7, y + (i % 2) * 3, SPAWN_Z, { ...o, hoverZ: -55 - (i % 2) * 10, hoverT: o.hoverT ?? 5 }); break;
         default: e = this.spawnEnemy(kind, x + k * 4, y, SPAWN_Z, o);
       }
     }
@@ -295,16 +319,17 @@ export class Game {
       obj.position.set(o.x ?? (Math.random() < 0.5 ? -1 : 1) * rand(35, 70), o.y ?? rand(-20, 25), SPAWN_Z - 150);
     } else if (kind === 'cloud') {
       obj = new THREE.Sprite(new THREE.SpriteMaterial({ map: this._cloudTex || (this._cloudTex = M.backdropTexture('cloud')), color: o.color || '#ff9ad0', transparent: true, opacity: 0.55, depthWrite: false, blending: THREE.AdditiveBlending }));
-      const s = rand(40, 90); obj.scale.set(s, s, 1);
+      const s = rand(70, 130); obj.scale.set(s, s, 1);
+      obj.material.opacity = 0.35;
       ent.spin = null; ent.drift = rand(-0.2, 0.2);
-      obj.position.set(rand(-60, 60), rand(-30, 30), SPAWN_Z - rand(0, 100));
+      obj.position.set((Math.random() < 0.5 ? -1 : 1) * rand(70, 110), rand(-40, 40), SPAWN_Z - rand(0, 100));
     } else if (kind === 'wire') {
       obj = M.makeWireShape(o.r || rand(6, 16));
       obj.position.set(o.x ?? (Math.random() < 0.5 ? -1 : 1) * rand(20, 45), rand(-15, 20), SPAWN_Z - 100);
       ent.spin = V().set(rand(-0.5, 0.5), rand(-0.5, 0.5), 0);
     } else if (kind === 'structure') {
-      obj = new THREE.Mesh(new THREE.BoxGeometry(rand(6, 14), rand(10, 30), rand(10, 30)), M.lambert('#6a7080'));
-      obj.position.set((Math.random() < 0.5 ? -1 : 1) * rand(30, 50), rand(-10, 10), SPAWN_Z - 60);
+      obj = M.makeStation();
+      obj.position.set((Math.random() < 0.5 ? -1 : 1) * rand(34, 55), rand(-12, 12), SPAWN_Z - rand(20, 80));
     } else if (kind === 'turret') {
       return this.spawnEnemy('turret', o.x ?? rand(-12, 12), this.ground ? this.env.groundY + 0.5 : (o.y ?? -6), SPAWN_Z, o);
     }
@@ -367,13 +392,32 @@ export class Game {
 
   // ================= Effekte =================
   explode(p, color = '#ffb060', size = 1) {
-    const n = Math.floor(22 * size + 8);
+    const n = Math.floor(8 * size + 6);
     for (let i = 0; i < n; i++) {
-      tmp.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize().multiplyScalar(rand(6, 22) * Math.sqrt(size));
-      this.sparks.spawn(p, tmp, rand(0.4, 0.9) * Math.min(2, size), Math.random() < 0.4 ? '#ffffff' : color, { drag: 2.2 });
+      tmp.set(rand(-1, 1), rand(-1, 1), rand(-1, 1)).normalize().multiplyScalar(rand(6, 18) * Math.sqrt(size));
+      this.sparks.spawn(p, tmp, rand(0.3, 0.7) * Math.min(2, size), Math.random() < 0.5 ? '#ffe0a0' : color, { drag: 2.5 });
     }
-    for (let i = 0; i < Math.min(4, 1 + size); i++) this.flashes.spawn(p, tmp.set(rand(-2, 2), rand(-2, 2), rand(-2, 2)), 0.25 + 0.1 * size, i ? color : '#ffffff', { drag: 3 });
+    // Feuerball: orange Hülle, heller Kern
+    this.blast(p, '#ff7a2a', 5 * Math.sqrt(size), 0.55 + 0.15 * size);
+    this.blast(p, '#ffe6b0', 2.6 * Math.sqrt(size), 0.3 + 0.08 * size);
+    if (color !== '#ffb060') this.blast(p, color, 3.5 * Math.sqrt(size), 0.4);
     audio.boom(size);
+  }
+  blast(p, color, size, life) {
+    const b = this.blasts.find((b) => b.life <= 0) || this.blasts[0];
+    b.s.position.copy(p); b.s.material.color.set(color); b.s.visible = true;
+    b.life = b.max = life; b.size = size;
+  }
+  updateBlasts(dt, scroll) {
+    for (const b of this.blasts) {
+      if (b.life <= 0) continue;
+      b.life -= dt;
+      if (b.life <= 0) { b.s.visible = false; continue; }
+      const k = 1 - b.life / b.max;
+      b.s.scale.setScalar(b.size * (0.35 + 1.1 * Math.sqrt(k)));
+      b.s.material.opacity = Math.pow(1 - k, 1.4);
+      b.s.position.z += scroll * dt * 0.5;
+    }
   }
 
   // ================= Spieleraktionen =================
@@ -396,7 +440,7 @@ export class Game {
   aimDir() {
     const p = this.p;
     const aim = tmp.set(p.pos.x + p.vel.x * 0.9, p.pos.y + p.vel.y * 0.9, -60);
-    let best = null, bestA = 0.12;
+    let best = null, bestA = 0.16;
     const d0 = tmp2.copy(aim).sub(p.pos).normalize();
     const cand = this.targets();
     for (const t of cand) {
@@ -452,9 +496,10 @@ export class Game {
     p.bombs--;
     audio.bomb();
     const c = V().set(p.pos.x, p.pos.y, -45);
-    for (let i = 0; i < 80; i++) this.sparks.spawn(c, tmp.set(rand(-1, 1), rand(-1, 1), rand(-0.3, 0.3)).normalize().multiplyScalar(rand(30, 60)), 1.0, i % 2 ? '#ffffff' : '#ffb347', { drag: 1.5 });
+    for (let i = 0; i < 40; i++) this.sparks.spawn(c, tmp.set(rand(-1, 1), rand(-1, 1), rand(-0.3, 0.3)).normalize().multiplyScalar(rand(30, 60)), 1.0, i % 2 ? '#ffffff' : '#ffb347', { drag: 1.5 });
     this.flashes.spawn(c, tmp.set(0, 0, 0), 0.6, '#ffffff');
     for (const b of this.bullets) { b.dead = true; b.life = 0; }
+    this.blast(c, '#ffd080', 40, 0.7);
     for (const e of this.ents) if (e.enemy && e.pos.z > -130 && e.pos.z < 0 && !e.obstacle) this.damage(e, 8);
     if (this.boss) for (const part of this.boss.parts) if (part.alive) this.boss.hit(part, 6, this);
     this.ui.flash?.();
@@ -671,6 +716,11 @@ export class Game {
         e.pos.lerp(tmp.copy(w.obj.position).add(tmp2.set(Math.sin(e.age * 3) * 2, 1, 6)), Math.min(1, dt * 4));
         if (Math.random() < dt * 2) { this.sparks.spawn(w.obj.position, tmp.set(0, 0, 0), 0.3, '#ff7ad0'); }
       }
+      if (e.ship) {
+        // Schiffe legen sich in die Kurve
+        const vx = (e.pos.x - (e.lx ?? e.pos.x)) / Math.max(dt, 1e-3); e.lx = e.pos.x;
+        e.obj.rotation.z += (clamp(-vx * 0.05, -0.9, 0.9) - e.obj.rotation.z) * Math.min(1, dt * 5);
+      }
       if (e.spin) { e.obj.rotation.x += e.spin.x * dt; e.obj.rotation.y += e.spin.y * dt; }
       if (e.obj.userData.spin) { e.obj.userData.spin.rotation.y += dt * 2; e.obj.userData.spin.rotation.x += dt * 1.2; }
       if (e.kind === 'dart' && !e.chaser) e.obj.lookAt(tmp.copy(e.pos).add(tmp2.set(0, 0, 1)));
@@ -729,6 +779,7 @@ export class Game {
     }
 
     this.sparks.update(dt, scroll);
+    this.updateBlasts(dt, scroll);
     this.flashes.update(dt, scroll);
     this.bulletPool.update(dt, 0);
   }
@@ -763,10 +814,20 @@ export class Game {
   // ================= Level-Ereignisse =================
   runEvent([, type, a = {}]) {
     switch (type) {
-      case 'wave': this.wave(a.kind || 'drone', a.form || 'line', a.n || 5, a); break;
-      case 'asteroids': this.spawnAsteroids(a.n || 12, a); break;
-      case 'decor': for (let i = 0; i < (a.n || 1); i++) this.spawnDecor(a.kind, a); break;
-      case 'mines': for (let i = 0; i < (a.n || 6); i++) this.spawnEnemy('mine', rand(-this.bounds.x, this.bounds.x), rand(this.bounds.yMin, this.bounds.yMax), SPAWN_Z - rand(0, 120)); break;
+      case 'wave': {
+        // Übersichtlich halten: kleinere Wellen, große Schiffe höchstens zu zweit
+        const n = a.n || 5;
+        this.wave(a.kind || 'drone', a.form || 'line', a.kind === 'splitter' ? Math.min(2, n) : clamp(Math.round(n * 0.65), 1, 5), a);
+        break;
+      }
+      case 'asteroids': this.spawnAsteroids(Math.round((a.n || 12) * 0.5), a); break;
+      case 'decor': {
+        if (a.kind === 'wire') break;
+        const n = a.kind === 'cloud' ? Math.ceil((a.n || 1) / 3) : a.n || 1;
+        for (let i = 0; i < n; i++) this.spawnDecor(a.kind, a);
+        break;
+      }
+      case 'mines': for (let i = 0; i < Math.round((a.n || 6) * 0.55); i++) this.spawnEnemy('mine', rand(-this.bounds.x, this.bounds.x), rand(this.bounds.yMin, this.bounds.yMax), SPAWN_Z - rand(0, 120)); break;
       case 'turrets': for (let i = 0; i < (a.n || 3); i++) this.spawnDecor('turret', { x: rand(-14, 14), y: a.y }); break;
       case 'ring': this.spawnRing(a.x ?? 0, a.y ?? (this.bounds.yMin + this.bounds.yMax) / 2, a.gold); break;
       case 'item': this.spawnItem(a.kind, a.x ?? 0, a.y ?? (this.bounds.yMin + this.bounds.yMax) / 2); break;
@@ -781,15 +842,15 @@ export class Game {
   }
 
   envTo(a) {
-    const from = { stars: this.starMat.opacity, fog: this.scene.fog.color.clone(), sky: this.scene.background.clone(), near: this.scene.fog.near, far: this.scene.fog.far };
-    const to = { stars: a.stars ?? from.stars, fog: a.fog ? new THREE.Color(a.fog) : from.fog, sky: a.sky ? new THREE.Color(a.sky) : from.sky, near: a.near ?? from.near, far: a.far ?? from.far };
+    const from = { stars: this.starMat.opacity, fog: this.scene.fog.color.clone(), sky: this.scene.backgroundIntensity, near: this.scene.fog.near, far: this.scene.fog.far };
+    const to = { stars: a.stars ?? from.stars, fog: a.fog ? new THREE.Color(a.fog) : from.fog, sky: a.stars !== undefined ? 0.2 + 0.8 * a.stars : from.sky, near: a.near ?? from.near, far: a.far ?? from.far };
     const dur = a.dur || 4;
     let k = 0;
     this.envAnim = (dt) => {
       k = Math.min(1, k + dt / dur);
       this.starMat.opacity = from.stars + (to.stars - from.stars) * k;
       this.scene.fog.color.copy(from.fog).lerp(to.fog, k);
-      this.scene.background.copy(from.sky).lerp(to.sky, k);
+      this.scene.backgroundIntensity = from.sky + (to.sky - from.sky) * k;
       this.scene.fog.near = from.near + (to.near - from.near) * k;
       this.scene.fog.far = from.far + (to.far - from.far) * k;
       if (a.backdropOpacity !== undefined && this.backdrop) this.backdrop.material.opacity += (a.backdropOpacity - this.backdrop.material.opacity) * k;
