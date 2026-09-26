@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>URLICHT – Flug zum Rand des Universums</title>
+  <meta name="description" content="URLICHT – ein 3D-Arcade-Weltraumshooter für den Browser. Flieg mit Juno, Mira, Brakk und Pip zum Rand des Universums.">
+  <meta name="theme-color" content="#05060f">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Urlicht">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <meta property="og:title" content="URLICHT – Flug zum Rand des Universums">
+  <meta property="og:description" content="3D-Arcade-Weltraumshooter im Browser – mit Story über den Anfang von allem.">
+  <meta property="og:image" content="icons/icon-512.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="cv"></canvas>
+  <div id="hurt"></div>
+  <div id="whiteout"></div>
+
+  <!-- HUD -->
+  <div id="hud" class="off">
+    <div id="hudLeft">
+      <div class="lbl">SCHILD</div>
+      <div id="shieldBar"><i id="shieldFill"></i></div>
+      <div id="bombs"></div>
+    </div>
+    <div id="hudRight">
+      <div id="score">0</div>
+      <div class="lbl">TREFFER <b id="hits">0</b></div>
+    </div>
+    <button id="btnPause" aria-label="Pause">❚❚</button>
+    <div id="bossBox" class="hidden"><div id="bossName"></div><div id="bossBar"><i id="bossFill"></i></div></div>
+    <div id="comms" class="hidden"><canvas id="commsPortrait" width="48" height="48"></canvas><div><b id="commsName"></b><span id="commsText"></span></div></div>
+    <div id="warn"></div>
+    <div id="tip"></div>
+    <div id="bonus"></div>
+  </div>
+
+  <!-- Touch-Steuerung -->
+  <div id="controls" class="off">
+    <div id="stickZone"><div id="stickBase"><div id="stickKnob"></div></div></div>
+    <button id="btnFire" aria-label="Feuer / Ladeschuss"><span>FEUER</span><svg viewBox="0 0 100 100"><circle id="chargeRing" cx="50" cy="50" r="46"/></svg></button>
+    <button id="btnRoll" aria-label="Rolle">ROLLE</button>
+    <button id="btnBomb" aria-label="Bombe">BOMBE</button>
+  </div>
+
+  <!-- Titel -->
+  <section id="scrTitle" class="screen show">
+    <div class="panel title">
+      <div class="logo">URLICHT</div>
+      <div class="sub">Flug zum Rand des Universums</div>
+      <button id="btnStart" class="btn big">Kampagne starten</button>
+      <button id="btnMap" class="btn">Level wählen</button>
+      <details class="opts">
+        <summary>Einstellungen</summary>
+        <div class="toggles">
+          <button class="toggle" data-set="music">🎵 Musik</button>
+          <button class="toggle" data-set="sfx">🔊 Sound</button>
+          <button class="toggle" data-set="autofire">🔫 Auto-Feuer</button>
+          <button class="toggle" data-set="invertY">✈ Y invertiert</button>
+        </div>
+      </details>
+      <details class="opts">
+        <summary>Steuerung</summary>
+        <ul>
+          <li><b>Linke Hälfte:</b> Finger aufsetzen und ziehen = steuern</li>
+          <li><b>FEUER halten:</b> Ladeschuss aufladen, loslassen = zielsuchende Rakete</li>
+          <li><b>ROLLE:</b> Schüsse abprallen lassen</li>
+          <li><b>BOMBE:</b> räumt alles vor dir frei</li>
+          <li>Tastatur: WASD/Pfeile, Leertaste, Q/E = Rolle, B = Bombe, P = Pause</li>
+        </ul>
+      </details>
+      <p class="hint">📱 Am besten im Querformat spielen.</p>
+      <a class="link" href="../">🫧 Weitere Spiele</a>
+    </div>
+  </section>
+
+  <!-- Levelkarte -->
+  <section id="scrMap" class="screen">
+    <div class="panel">
+      <h2>Flugroute</h2>
+      <div id="mapList"></div>
+      <button id="btnMapBack" class="btn ghost">Zurück</button>
+    </div>
+  </section>
+
+  <!-- Story-Dialog -->
+  <section id="scrStory" class="screen story">
+    <div class="storyBox">
+      <canvas id="storyPortrait" width="48" height="48"></canvas>
+      <div class="storyText"><b id="storyName"></b><p id="storyLine"></p></div>
+    </div>
+    <div class="storyHint">Tippen zum Weiterlesen · <button id="btnSkip">Überspringen ⏭</button></div>
+  </section>
+
+  <!-- Level-Titel -->
+  <section id="scrLevel" class="screen clear">
+    <div class="levelCard"><div id="lvlNum"></div><div id="lvlName"></div><div id="lvlSub"></div></div>
+  </section>
+
+  <!-- Ergebnis -->
+  <section id="scrResult" class="screen">
+    <div class="panel">
+      <h2 id="resTitle">Mission erfüllt</h2>
+      <div class="stats">
+        <div><small>Punkte</small><b id="resScore">0</b></div>
+        <div><small>Treffer</small><b id="resHits">0</b></div>
+      </div>
+      <div id="resMedal"></div>
+      <button id="btnNext" class="btn big">Weiter ▶</button>
+      <button id="btnResMap" class="btn ghost">Zur Flugroute</button>
+    </div>
+  </section>
+
+  <!-- Abschuss -->
+  <section id="scrDead" class="screen">
+    <div class="panel">
+      <h2>LUMEN getroffen!</h2>
+      <p class="sub2">„Steh auf, Funke. Das Universum wartet nicht.“ – Brakk</p>
+      <button id="btnContinue" class="btn big">Weiterfliegen <small id="contHint">volles Schild · 1× pro Level</small></button>
+      <button id="btnCheckpoint" class="btn">Ab Checkpoint</button>
+      <button id="btnRestart" class="btn">Level neu starten</button>
+      <button id="btnDeadMap" class="btn ghost">Zur Flugroute</button>
+    </div>
+  </section>
+
+  <!-- Pause -->
+  <section id="scrPause" class="screen">
+    <div class="panel">
+      <h2>Pause</h2>
+      <button id="btnResume" class="btn big">Weiter</button>
+      <div class="toggles">
+        <button class="toggle" data-set="music">🎵 Musik</button>
+        <button class="toggle" data-set="sfx">🔊 Sound</button>
+        <button class="toggle" data-set="autofire">🔫 Auto-Feuer</button>
+        <button class="toggle" data-set="invertY">✈ Y invertiert</button>
+      </div>
+      <button id="btnPauseRestart" class="btn">Level neu starten</button>
+      <button id="btnPauseMap" class="btn ghost">Zur Flugroute</button>
+    </div>
+  </section>
+
+  <!-- Ende -->
+  <section id="scrEnd" class="screen">
+    <div class="panel title">
+      <div class="logo small">ENDE</div>
+      <p class="sub2">Danke fürs Mitfliegen, Funke.</p>
+      <div class="credits">
+        <b>URLICHT</b><br>
+        Idee, Story, 3D-Modelle, Musik, Sounds &amp; Code: alles selbst gebaut.<br>
+        3D-Grafik mit three.js (MIT-Lizenz).<br><br>
+        Für alle, die nachts nach oben schauen und sich fragen, woher das Licht kommt.
+      </div>
+      <button id="btnEndMap" class="btn big">Zur Flugroute</button>
+    </div>
+  </section>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

@@ -1,9 +1,9 @@
 // Offline-Cache: Spiel lädt sofort und funktioniert ohne Netz.
 // Bei jeder Veröffentlichung VERSION erhöhen, damit Updates ankommen.
-const VERSION = 'blubberei-v4';
+const VERSION = 'urlicht-v1';
 const FILES = [
-  './', 'index.html', 'css/style.css', 'manifest.webmanifest',
-  'js/main.js', 'js/game.js', 'js/sprites.js', 'js/audio.js', 'js/ads.js',
+  './', 'index.html', 'style.css', 'manifest.webmanifest',
+  'js/main.js', 'js/game.js', 'js/models.js', 'js/bosses.js', 'js/levels.js', 'js/audio.js', 'js/three.module.min.js', '../js/ads.js',
   'icons/icon-192.png', 'icons/icon-512.png', 'icons/apple-touch-icon.png',
 ];
 

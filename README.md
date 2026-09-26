@@ -1,12 +1,13 @@
-# Handyspiele 🫧🌷🧪
+# Handyspiele 🫧🌷🧪🚀
 
-Drei Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und als App auf dem Homescreen.
+Vier Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und als App auf dem Homescreen.
 
 | Spiel | Adresse | Prinzip |
 |---|---|---|
 | **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
 | **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
 | **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure-Trilogie im Stil der Klassiker |
+| **URLICHT** | `https://deralo.github.io/Handygame-/urlicht/` | 3D-Arcade-Weltraumshooter (Rail-Shooter) |
 
 ---
 
@@ -129,3 +130,19 @@ Schrödinger sitzt auf der Q-Box UND der Pro Max – die beiden verschränken si
 - Code: `quantensalat/js/story3.js`
 
 Außerdem: Gesprächsthemen erscheinen jetzt erst, wenn Kai davon wissen kann, und erledigte Themen verschwinden.
+
+---
+
+# URLICHT 🚀 – Flug zum Rand des Universums
+
+3D-Arcade-Rail-Shooter im Geist der N64-Klassiker: Das Schiff fliegt automatisch vorwärts, du weichst aus, schießt, rollst und besiegst Endgegner – mit eigener Crew und eigener Story.
+
+**Story:** Im Jahr 3127 verschwinden am Rand des beobachtbaren Universums Galaxien, und die kosmische Hintergrundstrahlung wird leiser. „Die Stille“ frisst sich von außen nach innen. Kurierpilotin **Juno „Funke“ Varga**, Astrophysikerin **Mira**, der grummelige Ex-Bergbauroboter **Brakk** und **Pip** – ein Photon aus dem ersten Licht des Universums, das nach 13,8 Milliarden Jahren Flug zu denken begonnen hat – fliegen zum Rand. Dort zeigt sich: Die Stille ist die perfekte Symmetrie von *vor* dem Anfang. Das Universum existiert nur, weil diese Symmetrie einmal gebrochen wurde.
+
+**5 Missionen:** Ceres-Werft · Eismond Tethys (Tiefflug mit Saturn am Himmel) · Aurin-Nebel (Sternentstehung) · Das Letzte Licht (Sterne erlöschen) · Urlicht (die glühende Plasmawand am Rand des Sichtbaren). Jede mit eigenem Endgegner – der letzte lässt sich nur besiegen, indem man seine Symmetrie bricht.
+
+**Gameplay:** Zwillings-/Hyperlaser, zielsuchender Ladeschuss (Feuer halten), Rolle zum Abprallen gegnerischer Schüsse, Bomben, Schildringe (3 goldene = stärkerer Schild), Flügelmänner, die Hilfe brauchen, Treffer-Medaillen, Checkpoints, Funk-Dialoge mit Pixel-Porträts und „Piep-Stimmen“.
+
+**Steuerung (Handy):** linke Bildschirmhälfte = virtueller Joystick, rechts FEUER / ROLLE / BOMBE. Tastatur: WASD/Pfeile, Leertaste, Q/E, B, P.
+
+**Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`, damit das Spiel offline läuft). Alles andere selbst gebaut: Low-Poly-Modelle (`models.js`), Endgegner (`bosses.js`), Spielkern mit Partikeln und Kollisionen (`game.js`), Level & Story (`levels.js`), Synth-Musik mit Schlagzeug und Effekte (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.
