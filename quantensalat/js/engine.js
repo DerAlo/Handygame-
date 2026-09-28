@@ -226,12 +226,13 @@ export class Engine {
     }).filter(Boolean);
   }
   hit(x, y) {
-    const hs = this.hotspots();
-    for (let i = hs.length - 1; i >= 0; i--) {
-      const [rx, ry, rw, rh] = hs[i].rect;
-      if (x >= rx && x < rx + rw && y >= ry && y < ry + rh) return hs[i];
+    // Bei Überlappung gewinnt der kleinste Hotspot (Figuren und Gegenstände vor großen Kulissen)
+    let best = null, bestA = Infinity;
+    for (const h of this.hotspots()) {
+      const [rx, ry, rw, rh] = h.rect;
+      if (x >= rx && x < rx + rw && y >= ry && y < ry + rh && rw * rh <= bestA) { best = h; bestA = rw * rh; }
     }
-    return null;
+    return best;
   }
 
   async interact(h, verb, item) {

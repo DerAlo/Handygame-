@@ -1,6 +1,6 @@
 // Offline-Cache: Spiel lädt sofort und funktioniert ohne Netz.
 // Bei jeder Veröffentlichung VERSION erhöhen, damit Updates ankommen.
-const VERSION = 'quantensalat-v3';
+const VERSION = 'quantensalat-v4';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/engine.js', 'js/story.js', 'js/story2.js', 'js/story3.js', 'js/duel.js', 'js/art.js', 'js/sprites.js', 'js/audio.js',
