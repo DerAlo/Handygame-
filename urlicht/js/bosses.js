@@ -1,4 +1,4 @@
-// Endgegner von URLICHT
+// Endgegner von URLICHT – die Legion des Grafen Nihil
 import * as THREE from './three.module.min.js';
 import * as M from './models.js';
 import { audio } from './audio.js';
@@ -9,16 +9,16 @@ const tmp = V();
 const rand = (a, b) => a + Math.random() * (b - a);
 
 class Boss {
-  constructor(name, g) {
+  constructor(name, g, o = {}) {
     this.name = name;
     this.root = new THREE.Group();
-    this.root.position.set(0, g.ground ? g.env.groundY : 0, -280);
-    this.S = 1.4;
+    this.baseY = o.y ?? 0;
+    this.root.position.set(0, this.baseY, -300);
+    this.S = o.scale ?? 1.4;
     this.root.scale.setScalar(this.S);
-    this.baseY = this.root.position.y;
     this.parts = [];
     this.t = 0;
-    this.targetZ = -78;
+    this.targetZ = o.z ?? -80;
     this.dying = 0;
     this.defeated = false;
     this.dmgMul = 1;
@@ -53,10 +53,9 @@ class Boss {
     if (p.hp <= 0) {
       p.alive = false;
       p.obj.visible = false;
-      g.explode(p.obj.getWorldPosition(V()), p.color || '#9fb0ff', p.vital ? 3 : 1.6);
+      g.explode(p.obj.getWorldPosition(V()), '#ffb060', p.vital ? 3 : 1.8);
       g.score += p.vital ? 300 : 50;
       g.hits += 1;
-      p.onDestroy?.(g);
       this.onPartDestroyed?.(p, g);
       if (this.parts.filter((q) => q.vital).every((q) => !q.alive)) this.startDeath(g);
     } else audio.tink();
@@ -74,16 +73,18 @@ class Boss {
   }
   update(dt, g) {
     this.t += dt;
+    this.dt = dt;
     const r = this.root;
     this.entering = r.position.z < this.targetZ - 5;
     r.position.z += (this.targetZ - r.position.z) * Math.min(1, dt * 1.2);
     for (const p of this.parts) {
-      if (p.hitT > 0) { p.hitT -= dt; p.obj.scale.setScalar(p.baseScale * 1.15); } else p.obj.scale.setScalar(p.baseScale);
+      if (p.hitT > 0) { p.hitT -= dt; p.obj.scale.setScalar(p.baseScale * 1.12); } else p.obj.scale.setScalar(p.baseScale);
     }
     if (this.dying) {
       this.dying += dt;
-      if (Math.random() < dt * 10) g.explode(tmp.copy(r.position).add(V().set(rand(-10, 10), rand(-6, 8), rand(-4, 4))), Math.random() < 0.5 ? '#ffffff' : '#ffb060', rand(1, 2.5));
-      r.rotation.z += dt * 0.5;
+      if (Math.random() < dt * 10) g.explode(tmp.copy(r.position).add(V().set(rand(-12, 12), rand(-4, 10), rand(-4, 4))), '#ffb060', rand(1, 2.5));
+      r.rotation.z += dt * 0.4;
+      r.position.y -= dt * 3;
       if (this.dying > 3) { this.defeated = true; r.visible = false; g.explode(r.position, '#ffffff', 5); }
       return;
     }
@@ -95,11 +96,12 @@ class Boss {
   }
 }
 
-// ---------- Bauteile ----------
-const crystal = (c = '#d8e4ff', e = '#4050c0') => M.std(c, { metalness: 0.25, roughness: 0.06, emissive: e, emissiveIntensity: 0.45, flatShading: true });
-const EYE = '#ff3b5c';
+// ---------- Material & Bauteile ----------
+const steel = () => M.std('#8d939d', { metalness: 0.8, roughness: 0.3 });
+const plateD = () => M.std('#41464f', { metalness: 0.75, roughness: 0.35, flatShading: true });
+const red = () => M.MAT.paint('#d0283a');
+const eye = (c = '#ffcf3a') => M.std(c, { emissive: c, emissiveIntensity: 1.3, roughness: 0.2 });
 const _up = new THREE.Vector3(0, 1, 0);
-// Stachel (Kegel) von a nach b
 function spike(a, b, r, mat, segs = 6) {
   const A = new THREE.Vector3(...a), B = new THREE.Vector3(...b);
   const m = new THREE.Mesh(new THREE.ConeGeometry(r, A.distanceTo(B), segs), mat);
@@ -107,276 +109,279 @@ function spike(a, b, r, mat, segs = 6) {
   m.quaternion.setFromUnitVectors(_up, B.clone().sub(A).normalize());
   return m;
 }
-const ball = (r, mat, x = 0, y = 0, z = 0, seg = 14) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg, Math.ceil(seg * 0.7)), mat); m.position.set(x, y, z); return m; };
+const ball = (r, mat, x = 0, y = 0, z = 0, seg = 16) => { const m = new THREE.Mesh(new THREE.SphereGeometry(r, seg, Math.ceil(seg * 0.7)), mat); m.position.set(x, y, z); return m; };
+const box = (w, h, d, mat, x = 0, y = 0, z = 0) => { const m = new THREE.Mesh(new THREE.BoxGeometry(w, h, d), mat); m.position.set(x, y, z); return m; };
 const glowAt = (c, size, x, y, z, o = 0.8) => { const s = M.glowSprite(c, size, o); s.position.set(x, y, z); return s; };
+function shadows(g) { g.traverse((o) => { if (o.isMesh) o.castShadow = true; }); return g; }
 
-// ---------- 1: Splitterkönigin – Mutterschiff der Echos ----------
-function queen(g) {
-  const B = new Boss('SPLITTERKÖNIGIN', g);
-  const core = new THREE.Group();
-  core.add(new THREE.Mesh(M.lathe([[0, -5.5], [2.2, -5], [3.4, -3], [3.8, 0], [3.2, 2.8], [1.8, 4.6], [0.6, 5.3], [0, 5.4]], 10, 1.4, 0.6), M.MAT.echoPlate()));
-  core.add(new THREE.Mesh(M.lathe([[0, -3], [1.6, -2.4], [1.8, 1], [1, 2.6], [0, 3]], 12, 1, 0.7).translate(0, 1.6, -0.5), M.MAT.echo()));
-  // Kristallkrone
-  for (let i = 0; i < 8; i++) {
-    const a = (i / 8) * Math.PI * 2 + Math.PI / 8;
-    core.add(spike([Math.cos(a) * 4.2, Math.sin(a) * 2.2, -1.5], [Math.cos(a) * 8.5, Math.sin(a) * 4.8, -6.5], 0.7, crystal()));
-  }
-  for (const s of [-1, 1]) {
-    core.add(M.bar([s * 1.5, -0.2, 4.6], [s * 4.9, -0.2, 0.5], 0.09, M.basic('#a58bff'), 4));
-    const e = new THREE.Mesh(new THREE.CircleGeometry(0.9, 14), M.basic('#a58bff')); e.position.set(s * 2.4, 0, -5.2); e.rotation.y = Math.PI; core.add(e);
-    core.add(glowAt('#a58bff', 4.5, s * 2.4, 0, -5.8));
-  }
-  core.add(ball(1.3, M.basic(EYE), 0, 0.2, 5.0));
-  core.add(glowAt(EYE, 7, 0, 0.2, 5.6, 0.9));
-  const shield = M.makeShield(8.8, '#9fb0ff'); core.add(shield);
-  const cp = B.part(core, 45, 5.5, { vital: true, shielded: true, color: '#b0c0ff' });
-  const orbit = new THREE.Group(); B.root.add(orbit);
-  const shards = [];
-  for (let i = 0; i < 4; i++) {
-    const s = M.makeDrone(); s.scale.setScalar(1.5);
-    const a = (i / 4) * Math.PI * 2;
-    s.position.set(Math.cos(a) * 9.5, Math.sin(a) * 9.5, 2);
-    shards.push(B.part(s, 10, 2.8, { parent: orbit, color: '#b0c0ff' }));
-  }
-  B.onPartDestroyed = () => {
-    if (shards.every((s) => !s.alive) && cp.shielded) { cp.shielded = false; shield.visible = false; g.ui.say?.('mira', 'Der Kern ist ungeschützt! Jetzt, Juno!'); }
-  };
-  B.behave = (dt, g) => {
-    B.dt = dt;
-    B.root.position.x = Math.sin(B.t * 0.5) * 7;
-    B.root.position.y = B.baseY + Math.cos(B.t * 0.7) * 3;
-    orbit.rotation.z += dt * (cp.shielded ? 0.7 : 0);
-    core.rotation.z = Math.sin(B.t * 0.5) * 0.25;
-    core.rotation.y = Math.sin(B.t * 0.35) * 0.2;
-    for (const s of shards) if (s.alive) { s.fireT = (s.fireT ?? rand(0.5, 3)) - dt; if (s.fireT <= 0) { s.fireT = rand(2.4, 3.6); g.fireAimed(s.obj.getWorldPosition(V()), 32, 0.5); } }
-    B.every('fan', cp.shielded ? 3.8 : 2.8, () => g.fireFan(core.getWorldPosition(V()), 4, 0.16, 30));
-    if (!cp.shielded) B.every('ring', 3.2, () => g.fireRing(core.getWorldPosition(V()), 8, 24, '#9fb0ff', B.t));
-  };
-  return B;
-}
-
-// ---------- 2: Tiefenwächter – Festungs-Läufer ----------
-function waechter(g) {
-  const B = new Boss('TIEFENWÄCHTER', g);
-  B.targetZ = -85;
-  const body = new THREE.Group(); body.position.y = 3; B.root.add(body);
-  body.add(new THREE.Mesh(new THREE.SphereGeometry(8, 16, 8, 0, Math.PI * 2, 0, Math.PI / 2), M.MAT.echoPlate()));
-  body.add(new THREE.Mesh(new THREE.CylinderGeometry(8, 7, 2.4, 16).translate(0, -1.2, 0), M.MAT.echo()));
-  const band = new THREE.Mesh(new THREE.TorusGeometry(8.1, 0.45, 6, 32), M.MAT.paint('#ffb347'));
-  band.rotation.x = Math.PI / 2; band.position.y = 0.2; body.add(band);
-  for (let i = 0; i < 10; i++) { const a = (i / 10) * Math.PI * 2; body.add(M.bar([Math.cos(a) * 8.1, 0.4, Math.sin(a) * 8.1], [Math.cos(a) * 1.5, 7.9, Math.sin(a) * 1.5], 0.18, M.MAT.metal(), 5)); }
-  for (let i = 0; i < 8; i++) { const a = (i / 8) * Math.PI * 2; body.add(ball(0.3, M.basic(EYE), Math.cos(a) * 7.2, -1.2, Math.sin(a) * 7.2, 8)); }
+// ---------- 1: Krabbenläufer (Hafen von Aurelia) ----------
+function krabbe(g) {
+  const B = new Boss('KRABBENLÄUFER', g, { y: 0, z: -85 });
+  const body = new THREE.Group(); body.position.y = 7; B.root.add(body);
+  const shell = new THREE.SphereGeometry(8, 24, 12, 0, Math.PI * 2, 0, Math.PI / 2); shell.scale(1.4, 0.55, 1);
+  body.add(new THREE.Mesh(shell, steel()));
+  const under = new THREE.CylinderGeometry(11, 9.5, 2.4, 24); under.scale(1, 1, 0.72);
+  const um = new THREE.Mesh(under, plateD()); um.position.y = -1; body.add(um);
+  for (let i = -2; i <= 2; i++) body.add(box(1.2, 0.4, 9, red(), i * 3.2, 4.2 - Math.abs(i) * 0.6, -1));
   // Beine
-  for (const [x, z] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) {
-    const hip = [x * 6, 1, z * 5], knee = [x * 10.5, 5, z * 8], foot = [x * 11.5, -2.5, z * 9];
-    body.add(M.bar(hip, knee, 0.7, M.MAT.dark(), 8));
-    body.add(M.bar(knee, foot, 0.55, M.MAT.metal(), 8));
-    body.add(ball(1.1, M.MAT.echo(), ...knee));
-    const f = new THREE.Mesh(new THREE.CylinderGeometry(1.2, 1.8, 0.8, 8), M.MAT.dark()); f.position.set(...foot); body.add(f);
+  for (const s of [-1, 1]) for (const k of [-1, 0, 1]) {
+    const hip = [s * 9, 0, k * 4], knee = [s * 15, 5, k * 6.5], foot = [s * 16.5, -7.5, k * 7.5];
+    body.add(M.bar(hip, knee, 0.8, plateD(), 8)); body.add(M.bar(knee, foot, 0.6, steel(), 8));
+    body.add(ball(1.1, red(), ...knee, 10));
   }
-  const cannons = [];
+  // Augen auf Stielen
+  for (const s of [-1, 1]) { body.add(M.bar([s * 2, 3, 5], [s * 2.6, 7, 6], 0.3, steel(), 6)); body.add(ball(0.9, eye(), s * 2.6, 7.3, 6.2, 12)); }
+  // Scheren
+  const claws = [];
   for (const s of [-1, 1]) {
     const c = new THREE.Group();
-    c.add(new THREE.Mesh(new THREE.BoxGeometry(3, 2.6, 4), M.MAT.echoPlate()));
-    for (const o of [-0.6, 0.6]) {
-      const b = new THREE.CylinderGeometry(0.35, 0.5, 5, 10); b.rotateX(Math.PI / 2);
-      const m = new THREE.Mesh(b, M.MAT.metal()); m.position.set(o, 0.2, 4); c.add(m);
-      c.add(glowAt('#ff9a5a', 2, o, 0.2, 6.6, 0.8));
-    }
-    c.position.set(s * 9.5, 8, 0);
-    cannons.push(B.part(c, 16, 3.2, { color: '#ffb060' }));
+    c.add(M.bar([0, 0, -4], [0, 0, 0], 1.2, plateD(), 8));
+    const upper = new THREE.Group(); upper.add(spike([0, 0, 0], [0, 0.5, 6], 1.6, steel(), 7)); upper.position.y = 0.8; c.add(upper);
+    const lower = new THREE.Group(); lower.add(spike([0, 0, 0], [0, -0.3, 4.5], 1.1, red(), 7)); lower.position.y = -0.8; c.add(lower);
+    c.add(glowAt('#ff7a3a', 3, 0, 0, 2, 0.8));
+    c.position.set(s * 11, 6, 8);
+    c.userData = { upper, lower };
+    claws.push(B.part(shadows(c), 16, 3.4, { parent: body, side: s }));
   }
-  const eye = new THREE.Group();
-  eye.add(ball(2.6, M.std('#f4f4f8', { roughness: 0.2, metalness: 0.1 }), 0, 0, 0, 20));
-  eye.add(ball(1.3, M.basic(EYE), 0, 0, 1.8, 14));
-  eye.add(ball(0.55, M.basic('#200008'), 0, 0, 2.6, 10));
-  eye.add(glowAt(EYE, 5, 0, 0, 2.8, 0.6));
-  const frame = new THREE.Mesh(new THREE.TorusGeometry(2.9, 0.35, 8, 24), M.MAT.metal()); eye.add(frame);
-  const lid = ball(3.0, M.MAT.echoPlate(), 0, 0, 0, 16); eye.add(lid);
-  eye.position.set(0, 12, 0);
-  const ep = B.part(eye, 40, 3, { vital: true, shielded: true, color: '#ff6080' });
+  // Reaktor im Maul
+  const core = new THREE.Group();
+  core.add(ball(2.2, eye('#ff5a2a'), 0, 0, 0, 20));
+  core.add(glowAt('#ff7a3a', 9, 0, 0, 1.5, 0.8));
+  const lid = new THREE.Mesh(new THREE.SphereGeometry(2.6, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), plateD()); lid.rotation.x = Math.PI / 2; core.add(lid);
+  core.position.set(0, 1, 9.5);
+  const cp = B.part(core, 45, 3, { parent: body, vital: true, shielded: true });
+  shadows(body);
   B.onPartDestroyed = () => {
-    if (cannons.every((c) => !c.alive) && ep.shielded) { ep.shielded = false; lid.visible = false; g.ui.say?.('brakk', 'Das Auge ist offen. Ich hasse Augen. Schieß drauf!'); }
+    if (claws.every((c) => !c.alive) && cp.shielded) { cp.shielded = false; lid.visible = false; g.ui.say?.('hilde', 'Die Scheren sind ab! Jetzt ins Maul, Kira – auf den Reaktor!'); }
   };
   B.behave = (dt, g) => {
-    B.dt = dt;
-    B.root.position.x = Math.sin(B.t * 0.4) * 8;
-    body.position.y = 3 + Math.abs(Math.sin(B.t * 1.6)) * 0.6;
-    eye.lookAt(g.p.pos);
-    for (const c of cannons) if (c.alive) { c.obj.lookAt(g.p.pos); c.fireT = (c.fireT ?? rand(0.5, 2)) - dt; if (c.fireT <= 0) { c.fireT = 2.8; for (let i = 0; i < 2; i++) setTimeout(() => c.alive && g.fireAimed(c.obj.getWorldPosition(V()), 38, 0.3, '#ffb060'), i * 180); } }
-    B.every('mine', 6, () => g.spawnEnemy('mine', rand(-10, 10), g.env.groundY + rand(3, 10), B.root.position.z + 8, { vz: -g.speed + 25 }));
-    if (!ep.shielded) B.every('ring', 2.8, () => g.fireRing(eye.getWorldPosition(V()), 10, 26, '#ff6080', B.t));
+    B.root.position.x = Math.sin(B.t * 0.45) * 9;
+    body.position.y = 7 + Math.sin(B.t * 2.2) * 0.4;
+    body.rotation.z = Math.sin(B.t * 0.45 + 1) * 0.06;
+    for (const c of claws) if (c.alive) {
+      const snap = Math.max(0, Math.sin(B.t * 3 + c.side)) * 0.5;
+      c.obj.userData.upper.rotation.x = -snap; c.obj.userData.lower.rotation.x = snap;
+      c.fireT = (c.fireT ?? rand(0.5, 2)) - dt;
+      if (c.fireT <= 0) { c.fireT = 2.6; for (let i = 0; i < 3; i++) setTimeout(() => c.alive && g.fireAimed(c.obj.getWorldPosition(V()), 36, 0.4), i * 160); }
+    }
+    B.every('fan', cp.shielded ? 4 : 2.6, () => g.fireFan(core.getWorldPosition(V()), 5, 0.15, 30));
+    if (!cp.shielded) B.every('ring', 3, () => g.fireRing(core.getWorldPosition(V()), 10, 24, '#ff7a3a', B.t));
   };
   return B;
 }
 
-// ---------- 3: Nebelwurm ----------
-function wurm(g) {
-  const B = new Boss('NEBELWURM', g);
-  B.targetZ = -70;
-  const skin = M.std('#3a1f3e', { metalness: 0.8, roughness: 0.25, flatShading: true });
-  const head = new THREE.Group();
-  head.add(new THREE.Mesh(M.lathe([[0, -3], [2.2, -2.5], [2.8, -0.5], [2.4, 1.8], [1.3, 3.4], [0, 3.9]], 10, 1, 0.78), skin));
+// ---------- 2: Felsbrecher (Trümmergürtel) ----------
+function felsbrecher(g) {
+  const B = new Boss('FELSBRECHER', g, { z: -95 });
+  const hull = new THREE.Group(); B.root.add(hull);
+  hull.add(new THREE.Mesh(M.lathe([[0, -12], [6, -11], [8, -4], [8, 5], [6.5, 9], [3, 11], [0, 11.5]], 8, 1.3, 0.8), plateD()));
+  hull.add(box(8, 5, 10, steel(), 0, 6, -4));
+  hull.add(box(4, 3, 4, steel(), 0, 9.5, -6));
+  for (let i = 0; i < 4; i++) hull.add(box(3.6, 0.3, 0.4, eye(), 0, 10.1, -7.2 + i * 0.9));
+  for (const s of [-1, 1]) { hull.add(box(2, 1.4, 20, red(), s * 10.3, 0, -1)); for (let k = 0; k < 2; k++) { const e = glowAt('#ff9a3a', 7, s * (3 + k * 4), 0, -12.5, 0.9); hull.add(e); } }
+  const drills = [];
   for (const s of [-1, 1]) {
-    head.add(ball(0.45, M.basic(EYE), s * 1.4, 0.9, 2.2, 10));
-    head.add(spike([s * 1.1, -0.7, 2.4], [s * 0.4, -1.2, 5.6], 0.45, crystal('#ffd0f0', '#6a1a5a')));
-    head.add(spike([s * 1.4, 1.2, -1], [s * 2.6, 3.8, -3.5], 0.5, crystal('#ffd0f0', '#6a1a5a')));
+    const d = new THREE.Group();
+    d.add(M.bar([0, 0, -6], [0, 0, 0], 1.4, steel(), 8));
+    const bit = new THREE.Group();
+    bit.add(new THREE.Mesh(new THREE.ConeGeometry(2.6, 7, 10).rotateX(Math.PI / 2).translate(0, 0, 3.5), M.std('#c8a040', { metalness: 0.9, roughness: 0.3, flatShading: true })));
+    for (let k = 0; k < 4; k++) { const f = spike([0, 0, 0.5], [Math.cos(k * 1.57) * 3.2, Math.sin(k * 1.57) * 3.2, 2], 0.4, red()); bit.add(f); }
+    d.add(bit);
+    d.position.set(s * 13, -1, 6);
+    d.userData.bit = bit;
+    drills.push(B.part(shadows(d), 18, 3.6, { side: s, parent: hull }));
   }
-  head.add(glowAt('#ff9ad0', 8, 0, -0.5, 3.8, 0.7));
-  const hp = B.part(head, 55, 3.4, { vital: true, color: '#ff9ad0' });
+  const core = new THREE.Group();
+  core.add(ball(2.4, eye('#ffcf3a'), 0, 0, 0, 20));
+  core.add(glowAt('#ffcf3a', 10, 0, 0, 1.5, 0.8));
+  const lid = new THREE.Mesh(new THREE.CylinderGeometry(3, 3, 1, 12).rotateX(Math.PI / 2), steel()); lid.position.z = 1.8; core.add(lid);
+  core.position.set(0, 1, 11);
+  const cp = B.part(core, 50, 3, { parent: hull, vital: true, shielded: true });
+  B.onPartDestroyed = () => {
+    if (drills.every((d) => !d.alive) && cp.shielded) { cp.shielded = false; lid.visible = false; g.ui.say?.('rasko', 'Bohrer weg, Klappe auf. Mach ihn fertig, Chefin!'); }
+  };
+  B.behave = (dt, g) => {
+    B.root.position.x = Math.sin(B.t * 0.35) * 7;
+    B.root.position.y = Math.sin(B.t * 0.5) * 3;
+    hull.rotation.z = Math.sin(B.t * 0.35) * -0.08;
+    for (const d of drills) if (d.alive) d.obj.userData.bit.rotation.z += dt * 8;
+    // wirft Felsbrocken
+    B.every('rocks', cp.shielded ? 2.2 : 3, () => {
+      const alive = drills.filter((d) => d.alive);
+      const from = (alive.length ? alive[Math.floor(Math.random() * alive.length)].obj : core).getWorldPosition(V());
+      const r = rand(1.5, 2.8);
+      const obj = M.makeAsteroid(r); obj.position.copy(from);
+      g.addEnt({ kind: 'asteroid', obj, enemy: true, obstacle: true, hp: 2, r, score: 5, vz: 30, spin: V().set(1, 1, 0), path: null, bx: from.x, by: from.y });
+      const tgt = g.p.pos; const e = g.ents[g.ents.length - 1];
+      const k = 1 / Math.max(1, -from.z / 90);
+      e.path = (a) => [(tgt.x - from.x) * Math.min(1, a * k), (tgt.y - from.y) * Math.min(1, a * k)];
+    });
+    B.every('fan', 3, () => g.fireFan(core.getWorldPosition(V()), 5, 0.14, 32));
+    if (!cp.shielded) B.every('ring', 2.8, () => g.fireRing(core.getWorldPosition(V()), 10, 24, '#ffcf3a', B.t));
+  };
+  return B;
+}
+
+// ---------- 3: Magmaschlange (Pyra) ----------
+function magma(g) {
+  const B = new Boss('MAGMASCHLANGE', g, { y: 0, z: -70, scale: 1.3 });
+  const skin = M.std('#3a2a26', { metalness: 0.7, roughness: 0.35, flatShading: true });
+  const glowC = '#ff7a2a';
+  const head = new THREE.Group();
+  head.add(new THREE.Mesh(M.lathe([[0, -3.2], [2.4, -2.6], [3, -0.4], [2.6, 1.8], [1.4, 3.6], [0, 4.2]], 10, 1.1, 0.8), skin));
+  for (const s of [-1, 1]) {
+    head.add(ball(0.5, eye(), s * 1.6, 1.1, 2.4, 10));
+    head.add(spike([s * 1.2, -0.8, 2.6], [s * 0.4, -1.3, 6], 0.5, M.std('#c8a040', { metalness: 0.9, roughness: 0.3 })));
+    head.add(spike([s * 1.5, 1.4, -1], [s * 3, 4.4, -4], 0.6, red()));
+  }
+  head.add(glowAt(glowC, 8, 0, -0.6, 4.4, 0.7));
+  const hp = B.part(shadows(head), 60, 3.6, { vital: true });
   const segs = [];
-  for (let i = 0; i < 9; i++) {
+  for (let i = 0; i < 8; i++) {
     const k = 1 - i * 0.06;
     const s = new THREE.Group();
-    s.add(new THREE.Mesh(M.lathe([[0, -1.7], [1.8, -1.3], [2.1, 0], [1.8, 1.3], [0, 1.7]], 10, k, k * 0.85), skin));
-    s.add(new THREE.Mesh(new THREE.TorusGeometry(2.0 * k, 0.16, 6, 20), M.basic('#ff9ad0')));
-    s.add(spike([0, 1.5 * k, 0], [0, 3.4 * k, -1.2], 0.45 * k, crystal('#e0c0ff', '#40206a')));
-    segs.push(B.part(s, 5, 2.3, { color: '#c0a0ff' }));
+    s.add(new THREE.Mesh(M.lathe([[0, -1.8], [2, -1.4], [2.3, 0], [2, 1.4], [0, 1.8]], 10, k, k * 0.85), skin));
+    s.add(new THREE.Mesh(new THREE.TorusGeometry(2.2 * k, 0.2, 6, 20), eye(glowC)));
+    s.add(spike([0, 1.6 * k, 0], [0, 3.6 * k, -1.2], 0.5 * k, red()));
+    segs.push(B.part(shadows(s), 6, 2.4));
   }
   const trail = [];
   B.behave = (dt, g) => {
-    B.dt = dt;
-    const fast = hp.hp < hp.max * 0.5 ? 1.5 : 1;
+    const fast = hp.hp < hp.max * 0.5 ? 1.4 : 1;
     const t = B.t * fast;
-    head.position.set(Math.sin(t * 0.8) * 12, Math.cos(t * 1.1) * 5 + (g.ground ? 8 : 0), Math.sin(t * 0.5) * 12 - 4);
+    // taucht in die Lava ab und wieder auf
+    const dive = Math.sin(t * 0.55);
+    head.position.set(Math.sin(t * 0.8) * 11, 5 + dive * 9, Math.sin(t * 0.5) * 10 - 4);
+    hp.hittable = head.position.y > 0.5;
     trail.unshift(head.position.clone());
     if (trail.length > 200) trail.pop();
     let prev = head.position;
     segs.forEach((s, i) => {
       const q = trail[Math.min(trail.length - 1, (i + 1) * 6)];
       if (q) s.obj.position.copy(q);
+      s.hittable = s.obj.position.y > 0;
       s.obj.lookAt(B.root.localToWorld(tmp.copy(prev)));
       prev = s.obj.position;
     });
     head.lookAt(g.p.pos);
-    for (const s of segs) if (s.alive) { s.fireT = (s.fireT ?? rand(2, 8)) - dt; if (s.fireT <= 0) { s.fireT = rand(6, 9); g.fireAimed(s.obj.getWorldPosition(V()), 30, 1, '#c0a0ff'); } }
-    B.every('fan', 2.8 / fast, () => g.fireFan(head.getWorldPosition(V()), 4, 0.18, 32, '#ff9ad0'));
-    if (fast > 1) B.every('ring', 3.4, () => g.fireRing(head.getWorldPosition(V()), 10, 24, '#ff9ad0', B.t));
+    if (head.position.y < 1 && Math.random() < dt * 20) g.spray.spawn(head.getWorldPosition(V()).setY(0.4), V().set(rand(-6, 6), rand(8, 16), rand(-4, 4)), 0.8, '#ff8a3a', { drag: 1, g: 18 });
+    for (const s of segs) if (s.alive && s.hittable) { s.fireT = (s.fireT ?? rand(2, 8)) - dt; if (s.fireT <= 0) { s.fireT = rand(6, 9); g.fireAimed(s.obj.getWorldPosition(V()), 30, 1, '#ff7a2a'); } }
+    if (hp.hittable) B.every('fan', 2.8 / fast, () => g.fireFan(head.getWorldPosition(V()), 4, 0.18, 32, '#ff7a2a'));
+    if (fast > 1 && hp.hittable) B.every('ring', 3.4, () => g.fireRing(head.getWorldPosition(V()), 10, 24, '#ffb040', B.t));
   };
   return B;
 }
 
-// ---------- 4: Der Chor ----------
-function chor(g) {
-  const B = new Boss('DER CHOR', g);
-  const ring = new THREE.Group(); B.root.add(ring);
-  const center = new THREE.Group();
-  center.add(ball(3.2, M.basic('#fff6e0'), 0, 0, 0, 24));
-  center.add(M.glowSprite('#ffe8b0', 20, 0.8));
-  const cage = new THREE.Group(); center.add(cage);
-  const gold = M.std('#ffcf60', { metalness: 1, roughness: 0.2 });
-  for (let i = 0; i < 3; i++) { const t = new THREE.Mesh(new THREE.TorusGeometry(4.4 + i * 0.5, 0.18, 8, 40), gold); t.rotation.set(i * 1.1, i * 0.7, 0); cage.add(t); }
-  const shell = M.makeShield(6.5, '#ffe080'); center.add(shell);
-  const cp = B.part(center, 45, 4.5, { vital: true, shielded: true, color: '#ffffff' });
-  const singers = [];
-  for (let i = 0; i < 6; i++) {
-    const s = new THREE.Group();
-    // Horn-Schiff: Schalltrichter zeigt zum Spieler
-    s.add(new THREE.Mesh(M.lathe([[0, -2.6], [0.55, -2.2], [0.6, -0.2], [0.95, 1.0], [1.7, 2.1], [1.75, 2.3], [1.2, 2.2]], 14), gold));
-    const disc = new THREE.Mesh(new THREE.CircleGeometry(1.3, 16), M.basic('#ffe080')); disc.position.z = 2.0; s.add(disc);
-    s.add(glowAt('#ffe080', 5, 0, 0, 2.4, 0.7));
-    for (const k of [-1, 1]) s.add(spike([k * 0.5, 0, -1], [k * 2.4, 0, -2.8], 0.3, crystal('#fff0c0', '#6a5010')));
-    const a = (i / 6) * Math.PI * 2;
-    s.position.set(Math.cos(a) * 10, Math.sin(a) * 10, 0);
-    s.rotation.z = a;
-    singers.push(B.part(s, 9, 2.6, { parent: ring, color: '#ffe080' }));
+// ---------- 4: Schakal-Staffel (Glacia) ----------
+function schakale(g) {
+  const B = new Boss('SCHAKAL-STAFFEL', g, { y: 0, z: -60, scale: 1 });
+  const pilots = [];
+  const cols = ['#7a3aff', '#3a3a44', '#ff3a8a'];
+  for (let i = 0; i < 3; i++) {
+    const s = M.makeDart();
+    s.scale.setScalar(2.4);
+    s.traverse((o) => { if (o.isMesh && o.material.color && o.material.color.getHexString() === 'd0283a') o.material = M.MAT.paint(cols[i]); });
+    s.add(glowAt(cols[i], 4, 0, 0, -2.6, 0.9));
+    s.userData.phase = i * 2.1;
+    pilots.push(B.part(s, 22, 4, { vital: true, idx: i }));
   }
-  let sacrificed = false;
-  B.onPartDestroyed = () => {
-    const dead = singers.filter((s) => !s.alive).length;
-    if (dead >= 2 && !sacrificed && g.wing.find((w) => w.id === 'brakk')?.alive) {
-      sacrificed = true;
-      g.ui.brakkSacrifice?.(() => {
-        const target = singers.find((s) => s.alive);
-        const w = g.wing.find((w) => w.id === 'brakk');
-        if (w) { g.explode(w.obj.position, '#ffb060', 3); w.alive = false; }
-        if (target) B.hit(target, 99, g);
-      });
-    }
-    if (dead >= 4 && cp.shielded) { cp.shielded = false; shell.visible = false; g.ui.say?.('pip', 'Der Chor verstummt. Hörst du? Da ist noch eine Stimme. Unsere.'); }
+  let taunt = 0;
+  B.onPartDestroyed = (p) => {
+    const left = pilots.filter((q) => q.alive).length;
+    if (left === 2) g.ui.say?.('vex', 'Einer runter? Pah. Die Schakal-Staffel hat noch nie verloren!');
+    if (left === 1) g.ui.say?.('vex', 'Na schön, Luchs. Ich erledige das selbst!');
   };
   B.behave = (dt, g) => {
-    B.dt = dt;
-    B.root.position.x = Math.sin(B.t * 0.35) * 5;
-    B.root.position.y = Math.cos(B.t * 0.5) * 2;
-    ring.rotation.z += dt * 0.5;
-    cage.rotation.y += dt * 0.7; cage.rotation.x += dt * 0.4;
-    B.every('song', 0.5, () => {
-      const alive = singers.filter((s) => s.alive);
-      if (!alive.length) return;
-      const s = alive[Math.floor(B.t * 2) % alive.length];
-      const from = s.obj.getWorldPosition(V());
-      const d = from.clone().sub(B.root.position).normalize().multiplyScalar(0.35); d.z = 1;
-      g.fireBullet(from, d.normalize(), 26, '#ffe080');
-    });
-    B.every('aim', 3, () => g.fireAimed(center.getWorldPosition(V()), 36, 0.5, '#ffffff'));
-    if (!cp.shielded) B.every('ring', 2.8, () => g.fireRing(center.getWorldPosition(V()), 10, 24, '#ffffff', B.t));
+    const Y = (g.bounds.yMin + g.bounds.yMax) / 2 + 3;
+    for (const p of pilots) {
+      if (!p.alive) continue;
+      const ph = B.t * 0.9 + p.obj.userData.phase;
+      const solo = pilots.filter((q) => q.alive).length === 1;
+      const swoop = Math.max(0, Math.sin(B.t * 0.35 + p.idx * 2)) ** 6;
+      const x = Math.sin(ph) * (solo ? 14 : 12), y = Y + Math.sin(ph * 1.7) * 6, z = Math.cos(ph * 0.6) * 12 + swoop * 45;
+      const o = p.obj.position;
+      const nx = o.x + (x - o.x) * Math.min(1, dt * 2), ny = o.y + (y - o.y) * Math.min(1, dt * 2);
+      p.obj.rotation.set(0, 0, -(nx - o.x) / dt * 0.05);
+      o.set(nx, ny, o.z + (z - o.z) * Math.min(1, dt * 2));
+      p.fireT = (p.fireT ?? rand(0.5, 2)) - dt;
+      if (p.fireT <= 0) { p.fireT = solo ? 1.2 : 2.4; for (let i = 0; i < 3; i++) setTimeout(() => p.alive && g.fireAimed(p.obj.getWorldPosition(V()), 42, 0.3, '#c07aff'), i * 120); }
+    }
+    taunt += dt;
+    if (taunt > 14) { taunt = 0; g.ui.say?.('vex', ['Nett geflogen, Kätzchen. Für eine Hauskatze.', 'Graf Nihil zahlt gut. Und du? Du zahlst gleich drauf!', 'Hier im Eis frierst du mir fest, Luchs!'][Math.floor(Math.random() * 3)]); }
   };
   return B;
 }
 
-// ---------- 5: Die Stille – vollkommene Symmetrie ----------
-function stille(g) {
-  const B = new Boss('DIE STILLE', g);
-  B.targetZ = -90;
-  const mirrorMat = M.std('#f0f2ff', { metalness: 1, roughness: 0.03, flatShading: true, envMapIntensity: 1.4 });
-  const edgeMat = new THREE.LineBasicMaterial({ color: '#ffffff', toneMapped: false });
+// ---------- 5: Graf Nihil – der Chamäleon-Thron ----------
+function nihil(g) {
+  const B = new Boss('GRAF NIHIL', g, { z: -120, scale: 2.3 });
+  const skinMat = M.std('#3aa060', { metalness: 0.55, roughness: 0.25, transparent: true, opacity: 1, flatShading: true });
+  const head = new THREE.Group(); B.root.add(head);
+  head.add(new THREE.Mesh(M.lathe([[0, -8], [4.5, -6.5], [6.5, -2], [6, 2.5], [4.2, 6], [2, 8.5], [0, 9]], 20, 1.1, 0.95), skinMat));
+  // Helmkamm (Casque)
+  const crest = new THREE.Mesh(M.fin([[-7, 3], [2, 3], [-1, 9], [-6, 8]], 0.8), skinMat); head.add(crest);
+  // Kehlsack und Schuppenkämme
+  head.add(ball(3.6, skinMat, 0, -4.2, 3, 16));
+  for (let i = 0; i < 6; i++) head.add(spike([0, 5.6 - i * 0.3, 2 - i * 1.8], [0, 7.4 - i * 0.3, 1.4 - i * 1.8], 0.5, M.std('#e0c040', { metalness: 0.6, roughness: 0.3 })));
+  // Thron-Ring (Maschine hinter dem Kopf)
+  const ring = new THREE.Mesh(new THREE.TorusGeometry(13, 0.8, 8, 48), M.std('#2a2a34', { metalness: 0.9, roughness: 0.25 }));
+  ring.position.z = -6; B.root.add(ring);
+  for (let i = 0; i < 12; i++) { const a = (i / 12) * Math.PI * 2; ring.add(glowAt('#c07aff', 3, Math.cos(a) * 13, Math.sin(a) * 13, 0.5, 0.9)); }
+  // Drehbare Augen (Chamäleon!) – Geschütze
+  const eyes = [];
+  for (const s of [-1, 1]) {
+    const e = new THREE.Group();
+    e.add(ball(2.4, skinMat, 0, 0, 0, 18));
+    e.add(ball(1.2, eye('#ff4a2a'), 0, 0, 1.9, 14));
+    e.add(glowAt('#ff4a2a', 4, 0, 0, 2.6, 0.8));
+    e.add(ball(0.55, M.basic('#1a0a1a'), 0, 0, 2.9, 10));
+    e.position.set(s * 5.2, 2.6, 3);
+    eyes.push(B.part(e, 20, 2.8, { parent: head, side: s }));
+  }
+  // Maul-Kern
   const core = new THREE.Group();
-  const cm = new THREE.Mesh(new THREE.IcosahedronGeometry(8, 0), mirrorMat);
-  core.add(cm);
-  const edges = new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.IcosahedronGeometry(8.05, 0)), edgeMat); core.add(edges);
-  const shield = M.makeShield(10.5, '#ffffff'); core.add(shield);
-  const cp = B.part(core, 80, 8.5, { vital: true, shielded: true, color: '#ffffff' });
-  const halo = new THREE.Mesh(new THREE.TorusGeometry(15, 0.14, 6, 96), M.basic('#ffffff'));
-  halo.position.z = -4; B.root.add(halo);
-  const halo2 = new THREE.Mesh(new THREE.TorusGeometry(17, 0.08, 6, 96), M.basic('#ffffff', { transparent: true, opacity: 0.5 }));
-  halo2.position.z = -6; B.root.add(halo2);
-  const pods = [];
-  for (const [x, y] of [[-9.5, 4.5], [-9.5, -4.5], [9.5, 4.5], [9.5, -4.5]]) {
-    const p = new THREE.Group();
-    p.add(new THREE.Mesh(new THREE.OctahedronGeometry(3), mirrorMat));
-    p.add(new THREE.LineSegments(new THREE.EdgesGeometry(new THREE.OctahedronGeometry(3.03)), edgeMat));
-    p.add(M.glowSprite('#ffffff', 7, 0.45));
-    p.position.set(x, y, 0);
-    pods.push(B.part(p, 14, 3.4, { side: Math.sign(x), color: '#ffffff' }));
-  }
-  let broken = false, brakkBack = false;
+  core.add(ball(2.2, eye('#c07aff'), 0, 0, 0, 20));
+  core.add(glowAt('#c07aff', 9, 0, 0, 1.5, 0.9));
+  const jaw = new THREE.Mesh(new THREE.BoxGeometry(6, 1.4, 3), skinMat); jaw.position.set(0, -1.6, 0); core.add(jaw);
+  core.position.set(0, -1.8, 8.6);
+  const cp = B.part(core, 70, 3, { parent: head, vital: true, shielded: true });
+  let hidden = 0, cloakT = 7;
   B.onPartDestroyed = () => {
-    if (broken) return;
-    const left = pods.filter((q) => q.side < 0 && q.alive).length, right = pods.filter((q) => q.side > 0 && q.alive).length;
-    if (left === 0 || right === 0) {
-      broken = true;
-      cp.shielded = false;
-      shield.visible = false;
-      cm.material = M.std('#2a1030', { metalness: 0.6, roughness: 0.3, flatShading: true, emissive: '#ff6aa0', emissiveIntensity: 0.7 });
-      edges.material = new THREE.LineBasicMaterial({ color: '#ff9ad0', toneMapped: false });
-      halo.material = M.basic('#ff9ad0');
-      g.ui.symmetryBroken?.();
-    }
+    if (eyes.every((e) => !e.alive) && cp.shielded) { cp.shielded = false; g.ui.say?.('nihil', 'MEINE AUGEN! … Gleichgültig. Ich brauche keine Augen, um das Licht zu trinken!'); }
   };
   B.behave = (dt, g) => {
-    B.dt = dt;
-    B.root.position.x = Math.sin(B.t * 0.25) * 3;
-    B.root.position.y = Math.sin(B.t * 0.4) * 2;
-    core.rotation.y += dt * 0.25; core.rotation.x += dt * 0.12;
-    halo.rotation.z += dt * 0.2; halo2.rotation.z -= dt * 0.12;
-    for (const p of pods) p.obj.rotation.y += dt * 0.8;
-    // Symmetrie heilt sich selbst: beschädigte Kapseln regenerieren
-    if (!broken) for (const p of pods) if (p.alive) p.hp = Math.min(p.max, p.hp + dt * 1.2);
-    // spiegelbildliche Schüsse
-    B.every('mirror', 1.8, () => {
-      const alive = pods.filter((p) => p.alive);
-      for (const p of alive) g.fireAimed(p.obj.getWorldPosition(V()), 32, 0.2, '#ffffff');
+    B.root.position.x = Math.sin(B.t * 0.3) * 5;
+    B.root.position.y = Math.sin(B.t * 0.45) * 3;
+    ring.rotation.z += dt * 0.3;
+    // Farbwechsel wie ein Chamäleon
+    const hue = (B.t * 0.05) % 1;
+    skinMat.color.setHSL(0.25 + Math.sin(B.t * 0.3) * 0.25 + hue * 0, 0.55, 0.32);
+    // Augen drehen sich unabhängig voneinander
+    eyes.forEach((e, i) => {
+      if (!e.alive) return;
+      if (i === 0) e.obj.lookAt(g.p.pos); else e.obj.rotation.set(Math.sin(B.t * 1.3) * 0.8, Math.cos(B.t * 0.9) * 1.2, 0);
+      e.fireT = (e.fireT ?? rand(1, 2)) - dt;
+      if (e.fireT <= 0 && hidden <= 0) { e.fireT = 2.4; g.fireFan(e.obj.getWorldPosition(V()), 3, 0.12, 36, '#ffcf3a'); }
     });
-    if (broken) {
-      B.every('ring', 2.3, () => g.fireRing(core.getWorldPosition(V()), 12, 24, '#ff9ad0', B.t * 2));
-      B.every('fan', 3.2, () => g.fireFan(core.getWorldPosition(V()), 5, 0.14, 34, '#ffffff'));
-      if (!brakkBack && cp.hp < cp.max * 0.5) { brakkBack = true; g.ui.brakkReturns?.(() => { B.dmgMul = 1.6; }); }
-    } else B.every('ring', 3.8, () => g.fireRing(core.getWorldPosition(V()), 8, 22, '#ffffff', 0));
+    head.lookAt(tmp.copy(g.p.pos).multiplyScalar(0.3));
+    // Tarnung: wird fast unsichtbar und unverwundbar
+    cloakT -= dt;
+    if (cloakT <= 0 && hidden <= 0) { hidden = 3; cloakT = 9; g.ui.tip?.('Nihil tarnt sich! Weich aus, bis er wieder sichtbar wird.'); }
+    if (hidden > 0) {
+      hidden -= dt;
+      skinMat.opacity = Math.max(0.08, skinMat.opacity - dt * 2);
+      for (const p of B.parts) p.hittable = false;
+      B.every('cloakShot', 0.6, () => g.fireAimed(V().set(rand(-12, 12), rand(-6, 8), B.root.position.z), 34, 0.5, '#c07aff'));
+    } else {
+      skinMat.opacity = Math.min(1, skinMat.opacity + dt * 2);
+      for (const p of B.parts) p.hittable = true;
+      B.every('fan', cp.shielded ? 3.5 : 2.4, () => g.fireFan(core.getWorldPosition(V()), 5, 0.15, 32, '#c07aff'));
+      if (!cp.shielded) B.every('ring', 2.8, () => g.fireRing(core.getWorldPosition(V()), 12, 24, '#c07aff', B.t));
+    }
   };
   return B;
 }
 
 export function makeBoss(id, g) {
-  return { queen, waechter, wurm, chor, stille }[id](g);
+  return { krabbe, felsbrecher, magma, schakale, nihil }[id](g);
 }

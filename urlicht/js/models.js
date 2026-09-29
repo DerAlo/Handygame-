@@ -113,98 +113,114 @@ export function glowSprite(color, size, opacity = 1) {
   return s;
 }
 
-// ---------- Jäger der Allianz (Spieler & Flügelleute) ----------
-function buildFighter({ hull, accent, glow }) {
+// ---------- NOVA-Schwinge (Spieler & Staffel) ----------
+// Nase zeigt nach -z (in Flugrichtung)
+function buildNova({ hull = '#f2f4f8', accent = '#2a6aff', glow = '#6ad8ff' }) {
   const g = new THREE.Group();
   const H = MAT.hull(hull), A = MAT.paint(accent);
-  // Rumpf
-  g.add(new THREE.Mesh(lathe([[0, -3.1], [0.16, -2.75], [0.36, -2.05], [0.55, -1.05], [0.66, 0.05], [0.64, 0.85], [0.5, 1.45], [0.32, 1.7]], 20, 1, 0.72), H));
-  // Farbring an der Nase
-  const band = new THREE.TorusGeometry(0.4, 0.045, 6, 24); band.scale(1, 0.72, 1);
-  g.add(mesh(band, A, 0, 0, -1.9));
+  // Rumpf mit langer Nase
+  g.add(new THREE.Mesh(lathe([[0, -3.7], [0.14, -3.35], [0.34, -2.55], [0.52, -1.45], [0.64, -0.25], [0.66, 0.8], [0.56, 1.5], [0.4, 1.9]], 22, 1, 0.7), H));
+  for (const z of [-2.35, -2.1]) { const b = new THREE.TorusGeometry(0.4, 0.04, 6, 24); b.scale(1, 0.7, 1); g.add(mesh(b, A, 0, 0, z)); }
   // Cockpit
-  const cg = new THREE.SphereGeometry(0.5, 20, 12); cg.scale(0.6, 0.52, 1.75);
-  g.add(mesh(cg, MAT.glass(), 0, 0.3, -0.85));
-  // Lufteinlässe
-  for (const s of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(0.22, 0.3, 0.9), MAT.dark(), s * 0.58, 0.02, -0.15));
-  // Flügel
-  const wing = [[0.45, -0.55], [2.9, 0.75], [3.0, 1.15], [0.5, 1.35]];
-  const stripe = [[1.55, 0.2], [2.85, 0.83], [2.92, 1.02], [1.55, 0.6]];
-  const tipFin = [[0.35, 0], [1.2, 0], [1.3, 0.85], [1.0, 0.85]];
+  const cg = new THREE.SphereGeometry(0.5, 22, 14); cg.scale(0.56, 0.5, 1.9);
+  g.add(mesh(cg, MAT.glass(), 0, 0.3, -1.05));
+  const frame = new THREE.TorusGeometry(0.28, 0.035, 6, 20, Math.PI); frame.rotateY(Math.PI / 2); frame.scale(1, 1, 1.4);
+  g.add(mesh(frame, MAT.metal(), 0, 0.3, -0.25));
+  // Lufteinlässe und Rückenfinne
+  for (const s of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(0.2, 0.32, 1.0), MAT.dark(), s * 0.6, 0.02, -0.1));
+  g.add(new THREE.Mesh(fin([[0.4, 0.28], [1.6, 0.28], [1.85, 1.05], [1.45, 1.05]]), A));
+  // Hauptflügel
+  const wing = [[0.5, -0.9], [3.3, 1.0], [3.4, 1.35], [0.55, 1.6]];
+  const stripe = [[1.3, -0.08], [3.25, 1.05], [3.32, 1.25], [1.3, 0.38]];
+  const blade = [[-0.3, 0], [1.4, 0], [1.05, 1.5], [0.15, 2.2]];
   for (const s of [-1, 1]) {
     const w = new THREE.Group();
     w.add(new THREE.Mesh(plate(s > 0 ? wing : mirror(wing), 0.09), H));
     w.add(new THREE.Mesh(plate(s > 0 ? stripe : mirror(stripe), 0.13, 0.02), A));
-    const f = new THREE.Mesh(fin(tipFin), A); f.position.x = s * 2.95; w.add(f);
-    // Bordkanone unter dem Flügel
-    const gun = new THREE.CylinderGeometry(0.06, 0.08, 1.4, 8); gun.rotateX(Math.PI / 2);
-    w.add(mesh(gun, MAT.metal(), s * 1.25, -0.14, -0.1));
-    w.position.y = -0.12;
-    w.rotation.z = s * -0.07;
+    // Flügelklinge: schräg nach unten-außen, leuchtende Kante
+    const bl = new THREE.Group();
+    bl.add(new THREE.Mesh(fin(blade, 0.1), A));
+    bl.add(bar([0, -0.3 * 0 + 0, -0.3], [0, 2.2, 0.15], 0.05, basic(glow), 4));
+    bl.position.set(s * 3.3, 0, 0.9);
+    bl.rotation.z = -s * 2.55;
+    w.add(bl);
+    // Laserkanone an der Flügelwurzel
+    const gun = new THREE.CylinderGeometry(0.06, 0.08, 1.6, 8); gun.rotateX(Math.PI / 2);
+    w.add(mesh(gun, MAT.metal(), s * 1.1, -0.05, -0.6));
+    w.add(mesh(new THREE.SphereGeometry(0.07, 8, 6), basic('#7fff9a'), s * 1.1, -0.05, -1.42));
+    w.position.y = -0.1;
+    w.rotation.z = s * 0.06;
     g.add(w);
   }
-  // Heckflosse
-  g.add(new THREE.Mesh(fin([[0.6, 0.25], [1.55, 0.25], [1.75, 0.95], [1.45, 0.95]]), A));
   // Triebwerke
-  for (const s of [-1, 1]) { const e = engine(0.3, 1.0, glow); e.position.set(s * 0.46, -0.05, 1.45); g.add(e); }
-  const eng = glowSprite(glow, 1.8, 0.8);
-  eng.position.set(0, -0.05, 2.25);
+  for (const s of [-1, 1]) { const e = engine(0.32, 1.1, glow); e.position.set(s * 0.46, -0.04, 1.6); g.add(e); }
+  const eng = glowSprite(glow, 2.2, 0.85);
+  eng.position.set(0, -0.04, 2.5);
   g.add(eng);
   g.userData.engine = eng;
+  g.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+  return g;
+}
+export const SQUAD = {
+  kira: { accent: '#2a6aff', glow: '#6ad8ff' },
+  rasko: { accent: '#d0283a', glow: '#ff8a5a' },
+  oli: { accent: '#2fbf5a', glow: '#9affb0' },
+  hilde: { accent: '#e0a020', glow: '#ffd27a' },
+};
+export function makePlayerShip() { return buildNova(SQUAD.kira); }
+export function makeWingman(id) {
+  const g = buildNova(SQUAD[id] || SQUAD.kira);
+  g.scale.setScalar(0.8);
   return g;
 }
 
-export function makePlayerShip() {
-  return buildFighter({ hull: '#eef1f6', accent: '#ff8a2a', glow: '#7fd8ff' });
-}
-const WING = { '#ffb0d8': { hull: '#f3edf1', accent: '#ff4f9e', glow: '#ff9ad0' }, '#a8b0b8': { hull: '#707888', accent: '#ffd23a', glow: '#ffb347' } };
-export function makeWingman(color) {
-  const g = buildFighter(WING[color] || { hull: color, accent: '#7fd8ff', glow: '#7fd8ff' });
-  g.scale.setScalar(0.72);
-  return g;
-}
+// ---------- Legion des Grafen Nihil ----------
+// Grauer Stahl, rote Markierungen, gelbe Sensoraugen. Nase zeigt nach +z (auf den Spieler zu).
+const RED = '#d0283a', EYE = '#ffcf3a', FLAME = '#ff9a3a';
+const steel = () => std('#8d939d', { metalness: 0.8, roughness: 0.3 });
+const plateD = () => std('#41464f', { metalness: 0.75, roughness: 0.35, flatShading: true });
+const redP = () => MAT.paint(RED);
+const eyeM = () => std(EYE, { emissive: EYE, emissiveIntensity: 1.2, roughness: 0.2 });
+function shadows(g) { g.traverse((o) => { if (o.isMesh) o.castShadow = true; }); return g; }
 
-// ---------- Echos: hohle Kopien von Schiffen ----------
-// Alle Gegnermodelle zeigen mit der Nase nach +z (auf den Spieler zu).
-const EYE = '#ff3b5c', SEAM = '#a58bff';
-
-// Jäger – vorwärts gepfeilte Klingenflügel
+// Jäger
 export function makeDrone() {
   const g = new THREE.Group();
-  g.add(new THREE.Mesh(lathe([[0, -1.6], [0.4, -1.35], [0.66, -0.6], [0.72, 0.25], [0.5, 1.0], [0.18, 1.45], [0, 1.55]], 14, 1, 0.78), MAT.echo()));
-  const wing = [[0.5, -0.8], [2.35, 0.1], [2.75, 1.7], [2.4, 1.65], [0.55, 0.45]];
+  g.add(new THREE.Mesh(lathe([[0, -1.8], [0.45, -1.5], [0.72, -0.6], [0.76, 0.4], [0.46, 1.3], [0, 1.95]], 16, 1, 0.8), steel()));
+  const cg = new THREE.SphereGeometry(0.34, 14, 10); cg.scale(1, 0.75, 1.5);
+  g.add(mesh(cg, eyeM(), 0, 0.36, 0.55));
+  const wing = [[0.55, -0.9], [2.6, -0.25], [2.95, 0.95], [0.6, 0.5]];
+  const tip = [[2.25, -0.38], [2.62, -0.23], [2.97, 0.97], [2.6, 0.85]];
   for (const s of [-1, 1]) {
     const w = new THREE.Group();
-    w.add(new THREE.Mesh(plate(s > 0 ? wing : mirror(wing), 0.09), MAT.echoPlate()));
-    w.add(bar([s * 0.6, 0.07, 0.45], [s * 2.4, 0.07, 1.62], 0.05, basic(SEAM), 4));
-    w.add(bar([s * 2.6, 0, -0.1], [s * 2.6, 0, 1.3], 0.09, MAT.metal(), 6));
-    w.rotation.z = s * 0.28;
+    w.add(new THREE.Mesh(plate(s > 0 ? wing : mirror(wing), 0.09), plateD()));
+    w.add(new THREE.Mesh(plate(s > 0 ? tip : mirror(tip), 0.14, 0.02), redP()));
+    const gun = new THREE.CylinderGeometry(0.07, 0.07, 1.2, 6); gun.rotateX(Math.PI / 2);
+    w.add(mesh(gun, MAT.dark(), s * 1.5, -0.1, 0.7));
+    w.rotation.z = s * -0.12;
     g.add(w);
+    const f = new THREE.Mesh(fin([[-1.4, 0.3], [-0.5, 0.3], [-0.9, 1.0], [-1.5, 1.0]], 0.07), redP()); f.position.x = s * 0.35; f.rotation.z = s * -0.3; g.add(f);
   }
-  g.add(mesh(new THREE.SphereGeometry(0.26, 12, 8), basic(EYE), 0, 0.12, 1.2));
-  const eye = glowSprite(EYE, 1.4, 0.8); eye.position.set(0, 0.12, 1.35); g.add(eye);
-  const e = engine(0.34, 0.5, SEAM, -1); e.position.z = -1.55; g.add(e);
-  g.scale.setScalar(1.15);
-  return g;
+  const e = engine(0.36, 0.5, FLAME, -1); e.position.z = -1.8; g.add(e);
+  g.scale.setScalar(1.1);
+  return shadows(g);
 }
 
-// Pfeil – schneller Abfangjäger mit drei Finnen
+// Pfeil – schneller Abfangjäger
 export function makeDart() {
   const g = new THREE.Group();
-  g.add(new THREE.Mesh(lathe([[0, -2.3], [0.3, -2.1], [0.44, -1.1], [0.4, 0.6], [0.22, 1.8], [0, 2.9]], 12), MAT.echo()));
-  const f = [[0.3, -2.1], [1.4, -2.5], [1.3, -1.75], [0.36, -0.35]];
-  for (let k = 0; k < 3; k++) {
-    const m = new THREE.Mesh(plate(f, 0.07), MAT.echoPlate());
-    const p = new THREE.Group(); p.add(m); p.rotation.z = Math.PI / 2 + (k * Math.PI * 2) / 3; g.add(p);
-    const seam = bar([0.35, 0.05, -0.4], [1.35, 0.05, -2.2], 0.035, basic('#ff6ad0'), 4); p.add(seam);
-  }
-  g.add(mesh(new THREE.SphereGeometry(0.16, 10, 6), basic('#ff6ad0'), 0, 0, 2.2));
-  const e = engine(0.3, 0.4, '#ff6ad0', -1); e.position.z = -2.35; g.add(e);
-  g.scale.setScalar(1.2);
-  return g;
+  g.add(new THREE.Mesh(lathe([[0, -2.3], [0.32, -2.1], [0.46, -1.1], [0.42, 0.6], [0.22, 1.8], [0, 3.0]], 14), std('#2a2d34', { metalness: 0.85, roughness: 0.25 })));
+  const w = [[0.4, -1.9], [2.2, -2.4], [2.1, -1.8], [0.45, 0.2]];
+  for (const s of [-1, 1]) g.add(new THREE.Mesh(plate(s > 0 ? w : mirror(w), 0.07), redP()));
+  g.add(new THREE.Mesh(fin([[-2.2, 0.2], [-1.0, 0.2], [-1.5, 1.2], [-2.3, 1.2]], 0.07), redP()));
+  const cg = new THREE.SphereGeometry(0.22, 12, 8); cg.scale(1, 0.8, 2);
+  g.add(mesh(cg, eyeM(), 0, 0.28, 0.9));
+  const e = engine(0.32, 0.4, FLAME, -1); e.position.z = -2.35; g.add(e);
+  g.scale.setScalar(1.15);
+  return shadows(g);
 }
 
-// Minen – Stachelkugel mit Warnlicht
+// Minen
 export function makeMine() {
   const g = new THREE.Group();
   const core = new THREE.Group();
@@ -215,51 +231,73 @@ export function makeMine() {
   g.add(core);
   const glow = glowSprite('#ff2030', 2.6, 0.7); g.add(glow);
   g.userData.spin = core; g.userData.glow = glow;
-  return g;
+  return shadows(g);
 }
 
-// Träger – großes Schiff, das beim Abschuss Jäger freisetzt
+// Träger – dicker Frachter, der beim Abschuss Jäger freisetzt
 export function makeSplitter() {
   const g = new THREE.Group();
-  g.add(new THREE.Mesh(lathe([[0, -2.7], [1.0, -2.5], [1.45, -1.2], [1.5, 1.1], [1.05, 2.2], [0.45, 2.75], [0, 2.8]], 8, 1.35, 0.6), MAT.echoPlate()));
-  // Brücke
-  g.add(mesh(new THREE.BoxGeometry(0.9, 0.6, 1.4), MAT.echo(), 0, 0.95, -0.9));
-  g.add(mesh(new THREE.BoxGeometry(0.7, 0.12, 0.2), basic(SEAM), 0, 1.05, -0.2));
-  // Seitengondeln mit Augen
+  g.add(new THREE.Mesh(lathe([[0, -2.8], [1.1, -2.5], [1.5, -1.0], [1.5, 1.2], [1.0, 2.3], [0, 2.8]], 10, 1.4, 0.65), plateD()));
+  g.add(mesh(new THREE.BoxGeometry(1.0, 0.7, 1.6), steel(), 0, 1.0, -0.8));
+  g.add(mesh(new THREE.BoxGeometry(0.8, 0.14, 0.2), eyeM(), 0, 1.15, 0.05));
   for (const s of [-1, 1]) {
-    const pod = new THREE.Mesh(lathe([[0, -1.6], [0.5, -1.3], [0.55, 0.8], [0.3, 1.5], [0, 1.6]], 12), MAT.echo());
-    pod.position.set(s * 2.55, -0.1, 0.1); g.add(pod);
-    g.add(mesh(new THREE.BoxGeometry(1.2, 0.18, 1.2), MAT.dark(), s * 1.8, -0.1, 0));
-    g.add(mesh(new THREE.SphereGeometry(0.2, 10, 6), basic(EYE), s * 2.55, -0.1, 1.55));
-    const e = engine(0.36, 0.5, SEAM, -1); e.position.set(s * 2.55, -0.1, -1.75); g.add(e);
+    const pod = new THREE.Mesh(lathe([[0, -1.7], [0.55, -1.4], [0.6, 0.9], [0.3, 1.6], [0, 1.7]], 12), steel());
+    pod.position.set(s * 2.7, -0.1, 0); g.add(pod);
+    g.add(mesh(new THREE.BoxGeometry(1.4, 0.2, 1.4), redP(), s * 1.9, -0.1, 0));
+    const e = engine(0.4, 0.5, FLAME, -1); e.position.set(s * 2.7, -0.1, -1.9); g.add(e);
   }
-  // Hangar-Leuchten und Hauptauge
-  g.add(mesh(new THREE.BoxGeometry(1.6, 0.1, 2.2), basic(SEAM), 0, -0.9, 0));
-  g.add(mesh(new THREE.SphereGeometry(0.4, 12, 8), basic(EYE), 0, 0.1, 2.55));
-  const eye = glowSprite(EYE, 2.4, 0.8); eye.position.set(0, 0.1, 2.8); g.add(eye);
-  for (const s of [-0.6, 0.6]) { const e = engine(0.45, 0.5, SEAM, -1); e.position.set(s, 0, -2.75); g.add(e); }
-  g.scale.setScalar(1.2);
-  return g;
+  g.add(mesh(new THREE.SphereGeometry(0.42, 12, 8), eyeM(), 0, 0.1, 2.55));
+  g.scale.setScalar(1.25);
+  return shadows(g);
 }
 
-// Geschützturm (Boden) – Läufe zeigen nach +z
+// Geschützturm (auf Gebäuden, Schiffen oder Boden) – Läufe zeigen nach +z
 export function makeTurret() {
   const g = new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.7, 0.9, 8), MAT.echoPlate()));
+  g.add(new THREE.Mesh(new THREE.CylinderGeometry(1.25, 1.7, 0.9, 8), plateD()));
   const head = new THREE.Group(); head.position.y = 0.55;
-  head.add(new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), MAT.echo()));
+  head.add(new THREE.Mesh(new THREE.SphereGeometry(1.05, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), steel()));
   for (const s of [-1, 1]) {
     const b = new THREE.CylinderGeometry(0.11, 0.15, 2.0, 8); b.rotateX(Math.PI / 2);
-    head.add(mesh(b, MAT.metal(), s * 0.32, 0.45, 1.2));
-    head.add(mesh(new THREE.SphereGeometry(0.1, 8, 6), basic(EYE), s * 0.32, 0.45, 2.22));
+    head.add(mesh(b, MAT.dark(), s * 0.32, 0.45, 1.2));
   }
-  head.add(mesh(new THREE.BoxGeometry(0.6, 0.14, 0.1), basic(EYE), 0, 0.7, 0.85));
+  head.add(mesh(new THREE.BoxGeometry(0.6, 0.16, 0.1), eyeM(), 0, 0.7, 0.85));
+  head.add(mesh(new THREE.BoxGeometry(2.1, 0.12, 0.3), redP(), 0, 0.15, 0.2));
   g.add(head);
   g.userData.head = head;
-  return g;
+  return shadows(g);
 }
 
-// ---------- Hindernisse & Kulisse ----------
+// Panzer (fährt auf dem Boden)
+export function makeTank() {
+  const g = new THREE.Group();
+  for (const s of [-1, 1]) g.add(mesh(new THREE.BoxGeometry(0.8, 0.9, 4.2), MAT.dark(), s * 1.45, 0.45, 0));
+  g.add(mesh(new THREE.BoxGeometry(2.4, 1.0, 3.6), steel(), 0, 1.0, 0));
+  g.add(mesh(new THREE.BoxGeometry(2.5, 0.12, 0.5), redP(), 0, 1.5, 1.2));
+  const head = new THREE.Group(); head.position.y = 1.6;
+  head.add(new THREE.Mesh(new THREE.SphereGeometry(0.95, 14, 8, 0, Math.PI * 2, 0, Math.PI / 2), plateD()));
+  const b = new THREE.CylinderGeometry(0.14, 0.18, 2.4, 8); b.rotateX(Math.PI / 2 - 0.3);
+  head.add(mesh(b, MAT.dark(), 0, 0.45, 1.2));
+  head.add(mesh(new THREE.BoxGeometry(0.5, 0.14, 0.1), eyeM(), 0, 0.55, 0.8));
+  g.add(head);
+  g.userData.head = head;
+  return shadows(g);
+}
+
+// Großkreuzer der Legion (Kulisse im All, trägt Geschütztürme)
+export function makeCruiser() {
+  const g = new THREE.Group();
+  g.add(new THREE.Mesh(lathe([[0, -26], [5, -24], [8, -14], [8.5, 8], [6, 18], [2, 24], [0, 25]], 10, 1.4, 0.55), plateD()));
+  g.add(mesh(new THREE.BoxGeometry(6, 5, 12), steel(), 0, 5, -6));
+  g.add(mesh(new THREE.BoxGeometry(4, 3, 5), steel(), 0, 8.5, -8));
+  for (let i = 0; i < 5; i++) g.add(mesh(new THREE.BoxGeometry(3.4, 0.25, 0.4), eyeM(), 0, 9.2, -10 + i * 0.9));
+  for (const s of [-1, 1]) {
+    g.add(mesh(new THREE.BoxGeometry(4, 1.2, 30), redP(), s * 10.5, 0, -2));
+    for (let k = 0; k < 3; k++) { const e = engine(1.6, 2.5, FLAME, -1); e.position.set(s * (3 + k * 3), 0, -26); g.add(e); }
+    for (let k = 0; k < 8; k++) g.add(mesh(new THREE.BoxGeometry(0.4, 0.4, 0.4), eyeM(), s * 11.8, 0.2, -14 + k * 3.4));
+  }
+  return shadows(g);
+}
 const astGeos = [];
 export function makeAsteroid(r) {
   if (!astGeos.length) {
@@ -288,57 +326,6 @@ export function makeAsteroid(r) {
   return m;
 }
 
-export function makeGirder(len = 30) {
-  const g = new THREE.Group();
-  const mat = MAT.metal();
-  for (const [x, y] of [[-1, -1], [1, -1], [-1, 1], [1, 1]]) g.add(mesh(new THREE.BoxGeometry(0.3, 0.3, len), mat, x, y, 0));
-  for (let z = -len / 2; z <= len / 2; z += 4) {
-    g.add(mesh(new THREE.BoxGeometry(2.3, 0.22, 0.22), MAT.paint('#ffb020'), 0, 1, z));
-    g.add(mesh(new THREE.BoxGeometry(2.3, 0.22, 0.22), MAT.paint('#ffb020'), 0, -1, z));
-    g.add(bar([-1, -1, z], [-1, 1, z + 2], 0.08, mat, 4));
-    g.add(bar([1, -1, z], [1, 1, z + 2], 0.08, mat, 4));
-  }
-  const lamp = mesh(new THREE.SphereGeometry(0.2, 8, 6), basic('#ff3030'), 0, 1.3, -len / 2);
-  g.add(lamp);
-  return g;
-}
-
-// Werftmodul am Rand (Kulisse)
-export function makeStation() {
-  const g = new THREE.Group();
-  const L = 14 + Math.random() * 10;
-  g.add(new THREE.Mesh(new THREE.CylinderGeometry(2.4, 2.4, L, 20), MAT.hull('#c8ced8')));
-  for (const y of [-L / 2 + 1, 0, L / 2 - 1]) g.add(mesh(new THREE.TorusGeometry(2.6, 0.3, 8, 24).rotateX(Math.PI / 2), MAT.dark(), 0, y, 0));
-  const panel = std('#1c3a78', { metalness: 0.8, roughness: 0.25, emissive: '#081a40', emissiveIntensity: 0.6 });
-  for (const s of [-1, 1]) {
-    g.add(bar([s * 2.4, 0, 0], [s * 5, 0, 0], 0.15, MAT.metal()));
-    g.add(mesh(new THREE.BoxGeometry(4.5, 0.1, 9), panel, s * 7.3, 0, 0));
-  }
-  for (let i = 0; i < 6; i++) g.add(mesh(new THREE.BoxGeometry(0.35, 0.3, 0.05), basic('#ffd890'), Math.cos(i) * 2.2, -L / 2 + 2 + i * 1.6, Math.sin(i) * 2.2 + 0.2));
-  g.rotation.set(Math.random() * 0.6, 0, Math.PI / 2 + (Math.random() - 0.5) * 0.8);
-  return g;
-}
-
-const iceMat = () => std('#c4ecff', { metalness: 0.15, roughness: 0.08, flatShading: true, emissive: '#1a4a6e', emissiveIntensity: 0.35 });
-export function makeIcePillar(h) {
-  const g = new THREE.Group();
-  const main = new THREE.CylinderGeometry(0.5, 1.6, h, 6); main.translate(0, h / 2, 0);
-  g.add(new THREE.Mesh(main, iceMat()));
-  for (const [x, z, k, a] of [[0.9, 0.4, 0.55, 0.3], [-0.8, -0.3, 0.4, -0.35]]) {
-    const c = new THREE.CylinderGeometry(0.2, 0.7, h * k, 6); c.translate(0, (h * k) / 2, 0);
-    const m = new THREE.Mesh(c, iceMat()); m.position.set(x, 0, z); m.rotation.z = a; g.add(m);
-  }
-  return g;
-}
-export function makeArch() {
-  const g = new THREE.Group();
-  const mat = iceMat();
-  for (const s of [-1, 1]) { const c = new THREE.CylinderGeometry(0.9, 1.3, 16, 6); g.add(mesh(c, mat, s * 8, 8, 0)); }
-  const t = new THREE.CylinderGeometry(1.0, 1.0, 19, 6); t.rotateZ(Math.PI / 2);
-  g.add(mesh(t, mat, 0, 16, 0));
-  for (const s of [-1, 1]) g.add(mesh(new THREE.OctahedronGeometry(1.2), mat, s * 8, 16, 0));
-  return g;
-}
 export function makeRing(gold) {
   const g = new THREE.Group();
   const m = new THREE.Mesh(new THREE.TorusGeometry(1.6, 0.22, 12, 40), std(gold ? '#ffcf40' : '#e4ebf2', { metalness: 1, roughness: 0.18, emissive: gold ? '#6a4a00' : '#303844', emissiveIntensity: 0.5 }));
@@ -357,12 +344,6 @@ export function makeItem(kind) {
   g.add(spin);
   g.add(glowSprite(col, 3.6, 0.55));
   g.userData.spin = spin;
-  return g;
-}
-export function makeProtostar(color, r) {
-  const g = new THREE.Group();
-  g.add(new THREE.Mesh(new THREE.SphereGeometry(r, 20, 14), basic(color, { fog: false })));
-  const s = glowSprite(color, r * 7, 0.55); s.material = s.material.clone(); s.material.fog = false; g.add(s);
   return g;
 }
 export function makeWireShape(r) {
@@ -492,39 +473,3 @@ export function makePlanet(kind, size) {
   return g;
 }
 
-export function backdropTexture(kind) {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const x = c.getContext('2d');
-  if (kind === 'galaxy') {
-    x.translate(128, 128);
-    for (let i = 0; i < 2200; i++) {
-      const a = i * 0.05, r = Math.pow(i / 2200, 0.6) * 118;
-      const arm = (i % 2) * Math.PI;
-      const px = Math.cos(a * 0.5 + arm) * r + (Math.random() - 0.5) * 12, py = Math.sin(a * 0.5 + arm) * r * 0.45 + (Math.random() - 0.5) * 8;
-      x.fillStyle = `rgba(${200 + Math.random() * 55},${180 + Math.random() * 60},255,${0.5 * (1 - r / 130)})`;
-      x.fillRect(px, py, 2, 2);
-    }
-    const g = x.createRadialGradient(0, 0, 0, 0, 0, 34); g.addColorStop(0, 'rgba(255,240,210,1)'); g.addColorStop(1, 'rgba(255,240,210,0)');
-    x.fillStyle = g; x.fillRect(-34, -34, 68, 68);
-  } else if (kind === 'cloud') {
-    for (let i = 0; i < 26; i++) {
-      const px = 60 + Math.random() * 136, py = 60 + Math.random() * 136, r = 20 + Math.random() * 50;
-      const g = x.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, 'rgba(255,255,255,0.18)'); g.addColorStop(1, 'rgba(255,255,255,0)');
-      x.fillStyle = g; x.fillRect(0, 0, 256, 256);
-    }
-  }
-  return srgb(new THREE.CanvasTexture(c));
-}
-
-export function iceTexture() {
-  const c = document.createElement('canvas'); c.width = c.height = 256;
-  const x = c.getContext('2d');
-  x.fillStyle = '#9ec8e0'; x.fillRect(0, 0, 256, 256);
-  for (let i = 0; i < 90; i++) { x.fillStyle = `rgba(${Math.random() < 0.5 ? '255,255,255' : '70,110,150'},${0.08 + Math.random() * 0.12})`; x.fillRect(Math.random() * 256, Math.random() * 256, 8 + Math.random() * 40, 3 + Math.random() * 10); }
-  x.strokeStyle = 'rgba(40,80,120,0.5)'; x.lineWidth = 1.5;
-  for (let i = 0; i < 14; i++) { x.beginPath(); let px = Math.random() * 256, py = Math.random() * 256; x.moveTo(px, py); for (let k = 0; k < 5; k++) { px += (Math.random() - 0.5) * 60; py += (Math.random() - 0.5) * 60; x.lineTo(px, py); } x.stroke(); }
-  const t = srgb(new THREE.CanvasTexture(c));
-  t.wrapS = t.wrapT = THREE.RepeatWrapping;
-  t.repeat.set(6, 12);
-  return t;
-}

@@ -7,7 +7,7 @@ Vier Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und a
 | **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
 | **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
 | **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure-Trilogie im Stil der Klassiker |
-| **URLICHT** | `https://deralo.github.io/Handygame-/urlicht/` | 3D-Arcade-Weltraumshooter (Rail-Shooter) |
+| **URLICHT** | `https://deralo.github.io/Handygame-/urlicht/` | 3D-Arcade-Flugshooter (Rail-Shooter à la Star Fox) |
 
 ---
 
@@ -133,16 +133,16 @@ Außerdem: Gesprächsthemen erscheinen jetzt erst, wenn Kai davon wissen kann, u
 
 ---
 
-# URLICHT 🚀 – Flug zum Rand des Universums
+# URLICHT 🚀 – Staffel NOVA
 
-3D-Arcade-Rail-Shooter im Geist der N64-Klassiker: Das Schiff fliegt automatisch vorwärts, du weichst aus, schießt, rollst und besiegst Endgegner – mit eigener Crew und eigener Story.
+3D-Arcade-Flugshooter nach dem Vorbild der Star-Fox-Reihe (eigene Figuren, eigene Welt): Tiefflug über Meer, Hafenstadt, Lava-Canyons und Eisfelder, Raumschlachten zwischen Asteroiden und Großkreuzern – mit Boost, Bremse, Looping, Rolle und Ladeschuss.
 
-**Story:** Im Jahr 3127 verschwinden am Rand des beobachtbaren Universums Galaxien, und die kosmische Hintergrundstrahlung wird leiser. „Die Stille“ frisst sich von außen nach innen. Kurierpilotin **Juno „Funke“ Varga**, Astrophysikerin **Mira**, der grummelige Ex-Bergbauroboter **Brakk** und **Pip** – ein Photon aus dem ersten Licht des Universums, das nach 13,8 Milliarden Jahren Flug zu denken begonnen hat – fliegen zum Rand. Dort zeigt sich: Die Stille ist die perfekte Symmetrie von *vor* dem Anfang. Das Universum existiert nur, weil diese Symmetrie einmal gebrochen wurde.
+**Story:** Graf Zeno Nihil, ein Chamäleon-Forscher, hat am Rand des sichtbaren Universums ins Urlicht geschaut – das erste Licht nach dem Anfang. Seitdem will er es mit einem Kern aus Nullkristallen verschlucken, damit alles neu beginnt: in *seiner* Farbe. Die Söldnerstaffel **NOVA** stellt sich ihm: Anführerin **Kira Luchs**, das Ass **Rasko Rabe**, der Techniker **Oli Otter** und die Veteranin **Hilde Dachs** – die Nihil einst selbst zum Rand geflogen hat.
 
-**5 Missionen:** Ceres-Werft · Eismond Tethys (Tiefflug mit Saturn am Himmel) · Aurin-Nebel (Sternentstehung) · Das Letzte Licht (Sterne erlöschen) · Urlicht (die glühende Plasmawand am Rand des Sichtbaren). Jede mit eigenem Endgegner – der letzte lässt sich nur besiegen, indem man seine Symmetrie bricht.
+**5 Missionen:** Aurelia (Küste und Hafenstadt Portis) · Trümmergürtel (Asteroiden, Kreuzer) · Pyra (Lava und Canyons) · Glacia (Eiswelt, Söldner-Duell gegen die Schakal-Staffel) · Der Rand (die glühende Plasmawand des Urlichts). Endgegner: Krabbenläufer, Felsbrecher, Magmaschlange, Schakal-Staffel, Graf Nihil.
 
-**Gameplay:** Zwillings-/Hyperlaser, zielsuchender Ladeschuss (Feuer halten), Rolle zum Abprallen gegnerischer Schüsse, Bomben, Schildringe (3 goldene = stärkerer Schild), Flügelmänner, die Hilfe brauchen, Treffer-Medaillen, Checkpoints, Funk-Dialoge mit Pixel-Porträts und „Piep-Stimmen“.
+**Gameplay:** Laser (tippen), zielsuchender Ladeschuss (halten), Boost/Bremse mit Anzeige, Looping (Boost + Stick nach unten), Rolle gegen Schüsse, Bomben, Silber- und Goldringe, Laser-Upgrades, Tore zum Durchfliegen, Flügelleute, die Hilfe brauchen, Checkpoints, Treffer-Medaillen, Funk mit gemalten Porträts.
 
-**Steuerung (Handy):** linke Bildschirmhälfte = virtueller Joystick, rechts FEUER / ROLLE / BOMBE. Tastatur: WASD/Pfeile, Leertaste, Q/E, B, P.
+**Steuerung (Handy):** linke Bildschirmhälfte = Joystick, rechts FEUER / ROLLE / BOMBE / BOOST / BREMSE. Tastatur: WASD/Pfeile, Leertaste, Q/E, F (Boost), R (Bremse), B, P.
 
-**Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`, damit das Spiel offline läuft). Alles andere selbst gebaut: 3D-Modelle mit PBR-Materialien, Nebel-Panoramahimmel und Planeten (`models.js`), Endgegner (`bosses.js`), Spielkern mit Partikeln und Kollisionen (`game.js`), Level & Story (`levels.js`), Synth-Musik mit Schlagzeug und Effekte (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.
+**Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`). Selbst gebaut: Planetenwelt mit Himmels-Shader, Gelände-Biomen, Wasser/Lava, Stadt und Felsbögen (`world.js`), Schiffe und Gegner (`models.js`), Endgegner (`bosses.js`), Spielkern mit Schatten, Partikeln und automatischer Grafikanpassung (`game.js`), Story (`levels.js`), Porträts (`portraits.js`), Synth-Musik (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.

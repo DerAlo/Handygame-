@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <title>URLICHT – Flug zum Rand des Universums</title>
-  <meta name="description" content="URLICHT – ein 3D-Arcade-Weltraumshooter für den Browser. Flieg mit Juno, Mira, Brakk und Pip zum Rand des Universums.">
+  <title>URLICHT – Staffel NOVA</title>
+  <meta name="description" content="URLICHT – 3D-Arcade-Flugshooter für den Browser. Flieg mit der Staffel NOVA über Ozeane, Städte und Vulkane bis zum Rand des Universums.">
   <meta name="theme-color" content="#05060f">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
@@ -12,7 +12,7 @@
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" type="image/png" href="icons/icon-192.png">
   <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-  <meta property="og:title" content="URLICHT – Flug zum Rand des Universums">
+  <meta property="og:title" content="URLICHT – Staffel NOVA">
   <meta property="og:description" content="3D-Arcade-Weltraumshooter im Browser – mit Story über den Anfang von allem.">
   <meta property="og:image" content="icons/icon-512.png">
   <link rel="stylesheet" href="style.css">
@@ -27,6 +27,8 @@
     <div id="hudLeft">
       <div class="lbl">SCHILD</div>
       <div id="shieldBar"><i id="shieldFill"></i></div>
+      <div class="lbl">BOOST</div>
+      <div id="boostBar"><i id="boostFill"></i></div>
       <div id="bombs"></div>
     </div>
     <div id="hudRight">
@@ -35,7 +37,7 @@
     </div>
     <button id="btnPause" aria-label="Pause">❚❚</button>
     <div id="bossBox" class="hidden"><div id="bossName"></div><div id="bossBar"><i id="bossFill"></i></div></div>
-    <div id="comms" class="hidden"><canvas id="commsPortrait" width="48" height="48"></canvas><div><b id="commsName"></b><span id="commsText"></span></div></div>
+    <div id="comms" class="hidden"><canvas id="commsPortrait" width="128" height="128"></canvas><div><b id="commsName"></b><span id="commsText"></span></div></div>
     <div id="warn"></div>
     <div id="tip"></div>
     <div id="bonus"></div>
@@ -47,13 +49,15 @@
     <button id="btnFire" aria-label="Feuer / Ladeschuss"><span>FEUER</span><svg viewBox="0 0 100 100"><circle id="chargeRing" cx="50" cy="50" r="46"/></svg></button>
     <button id="btnRoll" aria-label="Rolle">ROLLE</button>
     <button id="btnBomb" aria-label="Bombe">BOMBE</button>
+    <button id="btnBoost" aria-label="Boost">BOOST</button>
+    <button id="btnBrake" aria-label="Bremse">BREMSE</button>
   </div>
 
   <!-- Titel -->
   <section id="scrTitle" class="screen show">
     <div class="panel title">
       <div class="logo">URLICHT</div>
-      <div class="sub">Flug zum Rand des Universums</div>
+      <div class="sub">Staffel NOVA · Flug zum Rand des Universums</div>
       <button id="btnStart" class="btn big">Kampagne starten</button>
       <button id="btnMap" class="btn">Level wählen</button>
       <details class="opts">
@@ -71,9 +75,11 @@
           <li><b>Linke Hälfte:</b> Finger aufsetzen und ziehen = steuern</li>
           <li><b>FEUER tippen:</b> Laser</li>
           <li><b>FEUER halten:</b> Ladeschuss aufladen, loslassen = zielsuchende Rakete</li>
+          <li><b>BOOST / BREMSE:</b> Tempo ändern (Anzeige oben links)</li>
+          <li><b>BOOST + Stick nach unten:</b> Looping</li>
           <li><b>ROLLE:</b> Schüsse abprallen lassen</li>
           <li><b>BOMBE:</b> räumt alles vor dir frei</li>
-          <li>Tastatur: WASD/Pfeile, Leertaste, Q/E = Rolle, B = Bombe, P = Pause</li>
+          <li>Tastatur: WASD/Pfeile, Leertaste, Q/E = Rolle, F = Boost, R = Bremse, B = Bombe, P = Pause</li>
         </ul>
       </details>
       <p class="hint">📱 Am besten im Querformat spielen.</p>
@@ -93,7 +99,7 @@
   <!-- Story-Dialog -->
   <section id="scrStory" class="screen story">
     <div class="storyBox">
-      <canvas id="storyPortrait" width="48" height="48"></canvas>
+      <canvas id="storyPortrait" width="128" height="128"></canvas>
       <div class="storyText"><b id="storyName"></b><p id="storyLine"></p></div>
     </div>
     <div class="storyHint">Tippen zum Weiterlesen · <button id="btnSkip">Überspringen ⏭</button></div>
@@ -121,8 +127,8 @@
   <!-- Abschuss -->
   <section id="scrDead" class="screen">
     <div class="panel">
-      <h2>LUMEN getroffen!</h2>
-      <p class="sub2">„Steh auf, Funke. Das Universum wartet nicht.“ – Brakk</p>
+      <h2>Abgeschossen!</h2>
+      <p class="sub2">„Kind, das nächste Mal: ROLLE!“ – Hilde</p>
       <button id="btnContinue" class="btn big">Weiterfliegen <small id="contHint">volles Schild · 1× pro Level</small></button>
       <button id="btnCheckpoint" class="btn">Ab Checkpoint</button>
       <button id="btnRestart" class="btn">Level neu starten</button>
@@ -150,10 +156,10 @@
   <section id="scrEnd" class="screen">
     <div class="panel title">
       <div class="logo small">ENDE</div>
-      <p class="sub2">Danke fürs Mitfliegen, Funke.</p>
+      <p class="sub2">Danke fürs Mitfliegen, NOVA.</p>
       <div class="credits">
         <b>URLICHT</b><br>
-        Idee, Story, 3D-Modelle, Musik, Sounds &amp; Code: alles selbst gebaut.<br>
+        Idee, Story, Figuren, 3D-Welten, Musik, Sounds &amp; Code: alles selbst gebaut.<br>
         3D-Grafik mit three.js (MIT-Lizenz).<br><br>
         Für alle, die nachts nach oben schauen und sich fragen, woher das Licht kommt.
       </div>
