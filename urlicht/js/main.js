@@ -12,6 +12,9 @@ const store = {
   set(k, v) { try { localStorage.setItem('urlicht.' + k, JSON.stringify(v)); } catch {} },
 };
 const settings = Object.assign({ music: true, sfx: true, autofire: false, invertY: false }, store.get('settings', {}));
+const isTouchDev = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+if (!settings.gfx) settings.gfx = isTouchDev ? 'mittel' : 'hoch';
+const GFX = ['hoch', 'mittel', 'niedrig'];
 // Ab Version 2 ist Dauerfeuer standardmäßig aus
 if (!settings.v2) { settings.v2 = true; settings.autofire = false; store.set('settings', settings); }
 const progress = Object.assign({ unlocked: 1, best: {}, seenProlog: false }, store.get('progress', {}));
@@ -41,7 +44,15 @@ const game = new Game($('cv'), {
   chaseFailed: (id) => say(id, { rasko: 'Hab ihn abgeschüttelt. Mit ein paar Federn weniger.', oli: 'Er ist weg … aber mein Schiff raucht ein bisschen. Nur ein bisschen!', hilde: 'Ich hab ihn verloren. Mein Heck hat eine neue Delle.' }[id] || 'Schon gut.'),
   dead: () => onDead(),
   levelClear: () => onClear(),
-});
+  contextLost: () => {
+    // Grafikchip überlastet: eine Stufe niedriger neu starten
+    const i = GFX.indexOf(settings.gfx);
+    settings.gfx = GFX[Math.min(GFX.length - 1, i + 1)];
+    store.set('settings', settings);
+    $('lost').classList.add('show');
+    setTimeout(() => location.reload(), 1500);
+  },
+}, settings.gfx);
 game.settings.autofire = settings.autofire;
 game.settings.invertY = settings.invertY;
 window.addEventListener('resize', () => game.resize());
@@ -162,6 +173,7 @@ async function startLevel(i, fromCp = false) {
     await story(L.briefing);
   }
   game.load(L, fromCp);
+  Object.assign(game.input, { x: 0, y: 0, fire: false, boost: false, brake: false, roll: false, bomb: false });
   audio.play(L.music);
   lastHud = '';
   updateHud(game);
@@ -255,8 +267,8 @@ function pause() {
 }
 function resume() { if (pausedFrom) { game.state = pausedFrom; pausedFrom = null; } show(null); }
 
-function syncToggles() { for (const b of document.querySelectorAll('.toggle')) b.setAttribute('aria-pressed', String(!!settings[b.dataset.set])); }
-for (const b of document.querySelectorAll('.toggle')) {
+function syncToggles() { for (const b of document.querySelectorAll('.toggle[data-set]')) b.setAttribute('aria-pressed', String(!!settings[b.dataset.set])); }
+for (const b of document.querySelectorAll('.toggle[data-set]')) {
   b.addEventListener('click', (e) => {
     e.stopPropagation(); audio.unlock();
     const k = b.dataset.set;
@@ -270,6 +282,16 @@ for (const b of document.querySelectorAll('.toggle')) {
   });
 }
 syncToggles();
+const GFX_LABEL = { hoch: 'Hoch', mittel: 'Mittel', niedrig: 'Niedrig' };
+function syncGfx() { for (const b of document.querySelectorAll('.gfx')) b.textContent = `🖥 Grafik: ${GFX_LABEL[settings.gfx]}`; }
+for (const b of document.querySelectorAll('.gfx')) b.addEventListener('click', (e) => {
+  e.stopPropagation();
+  settings.gfx = GFX[(GFX.indexOf(settings.gfx) + 1) % GFX.length];
+  store.set('settings', settings);
+  game.setQuality(settings.gfx);
+  syncGfx();
+});
+syncGfx();
 
 // ---------- Eingabe ----------
 const input = game.input;

@@ -83,7 +83,7 @@ class PointPool {
 }
 
 export class Game {
-  constructor(canvas, ui) {
+  constructor(canvas, ui, quality = 'hoch') {
     this.ui = ui;
     this.settings = { autofire: false, invertY: false };
     const touch = 'ontouchstart' in window;
@@ -93,6 +93,8 @@ export class Game {
     this.renderer.toneMappingExposure = 1.05;
     this.renderer.shadowMap.enabled = true;
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    // Wenn der Grafikchip aufgibt: melden statt weißes Bild
+    canvas.addEventListener('webglcontextlost', (e) => { e.preventDefault(); this.ui.contextLost?.(); });
     this.pmrem = new THREE.PMREMGenerator(this.renderer);
     this.scene = new THREE.Scene();
     this.camera = new THREE.PerspectiveCamera(62, 1, 0.5, 1000);
@@ -159,7 +161,20 @@ export class Game {
     this.state = 'idle';
     this.input = { x: 0, y: 0, fire: false, roll: false, bomb: false, boost: false, brake: false };
     this.t = 0; this.dist = 0;
+    this.setQuality(quality);
     this.resize();
+  }
+
+  // Grafikstufe: hoch (Schatten), mittel (ohne Schatten), niedrig (ohne Schatten, geringe Auflösung)
+  setQuality(q) {
+    this.quality = q;
+    const dpr = window.devicePixelRatio || 1;
+    const max = q === 'hoch' ? Math.min(dpr, 1.5) : q === 'mittel' ? Math.min(dpr, 1) : Math.min(dpr, 0.7);
+    this.q = { t: 0, n: 0, sum: 0, ratio: max, max, min: q === 'niedrig' ? 0.5 : 0.6 };
+    const sh = q === 'hoch';
+    if (this.renderer.shadowMap.enabled !== sh) { this.renderer.shadowMap.enabled = sh; this.scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); }
+    this.renderer.setPixelRatio(max);
+    this.renderer.setSize(window.innerWidth, window.innerHeight, false);
   }
 
   resize() {
@@ -959,14 +974,15 @@ export class Game {
 
   // Automatische Grafikqualität: Auflösung (und notfalls Schatten) an die Bildrate anpassen
   adapt(dt) {
-    const q = this.q || (this.q = { t: 0, n: 0, sum: 0, ratio: this.renderer.getPixelRatio(), max: this.renderer.getPixelRatio() });
+    const q = this.q;
+    if (!(dt > 0)) return;
     q.t += dt; q.n++; q.sum += dt;
-    if (q.t < 2) return;
+    if (q.t < 3) return;
     const avg = q.sum / q.n;
     q.t = q.n = q.sum = 0;
-    if (avg > 1 / 45 && q.ratio > 0.6) q.ratio = Math.max(0.6, q.ratio - 0.15);
-    else if (avg > 1 / 45 && this.renderer.shadowMap.enabled) { this.renderer.shadowMap.enabled = false; this.scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); }
-    else if (avg < 1 / 58 && q.ratio < q.max) q.ratio = Math.min(q.max, q.ratio + 0.1);
+    if (avg > 1 / 40 && this.renderer.shadowMap.enabled) { this.renderer.shadowMap.enabled = false; this.scene.traverse((o) => { if (o.material) o.material.needsUpdate = true; }); return; }
+    if (avg > 1 / 40 && q.ratio > q.min) q.ratio = Math.max(q.min, q.ratio - 0.1);
+    else if (avg < 1 / 57 && q.ratio < q.max) q.ratio = Math.min(q.max, q.ratio + 0.1);
     else return;
     this.renderer.setPixelRatio(q.ratio);
     this.renderer.setSize(window.innerWidth, window.innerHeight, false);

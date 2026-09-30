@@ -142,3 +142,5 @@ h2 { margin: 0 0 12px; font: 900 24px var(--mono); letter-spacing: 0.08em; }
   #comms { top: calc(var(--st) + 60px); }
 }
 #hud .lbl, #bombs, #hudRight { text-shadow: 0 1px 3px rgba(0, 0, 0, 0.85); }
+#lost { position: fixed; inset: 0; display: none; align-items: center; justify-content: center; text-align: center; padding: 20px; background: #05060f; color: #fff; font-weight: 800; font-size: 18px; z-index: 50; }
+#lost.show { display: flex; }
