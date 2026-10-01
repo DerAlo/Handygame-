@@ -1,0 +1,16 @@
+{
+  "name": "SCHWARMSTURM",
+  "short_name": "Schwarmsturm",
+  "description": "Führe deine Truppe durch Tore, Fallen und rote Horden.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "fullscreen",
+  "orientation": "portrait",
+  "background_color": "#2f7fff",
+  "theme_color": "#1a4ab0",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}

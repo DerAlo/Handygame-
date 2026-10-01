@@ -1,6 +1,6 @@
 // Offline-Cache: Spiel lädt sofort und funktioniert ohne Netz.
 // Bei jeder Veröffentlichung VERSION erhöhen, damit Updates ankommen.
-const VERSION = 'blockgarten-v3';
+const VERSION = 'blockgarten-v4';
 const FILES = [
   './', 'index.html', 'style.css', 'manifest.webmanifest',
   'js/main.js', 'js/game.js', 'js/tiles.js', 'js/audio.js', '../js/ads.js',

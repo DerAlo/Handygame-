@@ -7,6 +7,7 @@ Vier Spiele für zwischendurch – laufen direkt im Handy-Browser, offline und a
 | **Blubberei** | `https://deralo.github.io/Handygame-/` | Physik-Merge: gleiche Blubbs verschmelzen |
 | **Blockgarten** | `https://deralo.github.io/Handygame-/blockgarten/` | Block-Puzzle: volle Reihen erblühen |
 | **Quantensalat** | `https://deralo.github.io/Handygame-/quantensalat/` | Point-&-Click-Adventure-Trilogie im Stil der Klassiker |
+| **SCHWARMSTURM** | `https://deralo.github.io/Handygame-/schwarm/` | Truppen-Runner (Tore, Horden, Waffen, Bosse) |
 | **URLICHT** | `https://deralo.github.io/Handygame-/urlicht/` | 3D-Arcade-Flugshooter (Rail-Shooter à la Star Fox) |
 
 ---
@@ -146,3 +147,18 @@ Außerdem: Gesprächsthemen erscheinen jetzt erst, wenn Kai davon wissen kann, u
 **Steuerung (Handy):** linke Bildschirmhälfte = Joystick, rechts FEUER / ROLLE / BOMBE / BOOST / BREMSE. Tastatur: WASD/Pfeile, Leertaste, Q/E, F (Boost), R (Bremse), B, P.
 
 **Technik:** three.js (MIT, liegt unter `urlicht/js/three.module.min.js`). Selbst gebaut: Planetenwelt mit Himmels-Shader, Gelände-Biomen, Wasser/Lava, Stadt und Felsbögen (`world.js`), Schiffe und Gegner (`models.js`), Endgegner (`bosses.js`), Spielkern mit Schatten, Partikeln und automatischer Grafikanpassung (`game.js`), Story (`levels.js`), Porträts (`portraits.js`), Synth-Musik (`audio.js`), UI (`main.js`). Werbe-Hook: „Weiterfliegen“ nach einem Abschuss als Belohnungs-Video.
+
+
+# SCHWARMSTURM 🪖 – Truppen-Runner
+
+Ein Finger, eine Armee: Deine blaue Truppe rennt über Brücken. Ziehen = nach links/rechts steuern, geschossen wird automatisch – je größer die Truppe, desto dichter das Feuer.
+
+**Tore:** +N und ×N lassen die Truppe wachsen, −N und ÷2 kosten Kämpfer. Immer die bessere Seite wählen!
+
+**Gegner & Fallen:** rote Horden (Nahkampf Mann gegen Mann), Fässer und Mauern mit Lebenspunkten (abschießen oder Kämpfer opfern), Kreissägen, Riesenhämmer, Engstellen (wer zu breit läuft, fällt ins Wasser), Schützentürme, +1-Bahnen. Am Ende jedes Levels ein Boss: Rotriese, Kampfpanzer oder Lavagolem – jedes fünfte Level als MEGA-Boss.
+
+**Waffen** aus Waffenkisten (zuerst kaputtschießen): Pistole, Maschinengewehr, Schrotflinte, Raketenwerfer (Flächenschaden), Laser (durchschlagend).
+
+**Fortschritt:** Unendlich viele Level mit steigender Schwierigkeit, fünf Welten (Meer, Wüste, Eis, Lava, Neonstadt), Münzen und Shop-Upgrades (Starttrupp, Feuerkraft, Feuerrate, Münzglück). Werbe-Hooks: Münzen verdoppeln, Weiterkämpfen.
+
+**Technik:** three.js (aus `urlicht/js/`), alle Kämpfer als Instanzen in einem einzigen Draw-Call, keine teuren Schatten – läuft auch auf schwächeren Handys. Dateien: `schwarm/js/{game,models,levels,audio,main}.js`.

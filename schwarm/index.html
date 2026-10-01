@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>SCHWARMSTURM</title>
+  <meta name="description" content="SCHWARMSTURM – führe deine Truppe durch Tore, Fallen und rote Horden. Kostenloses Handyspiel im Browser.">
+  <meta name="theme-color" content="#1a4ab0">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Schwarmsturm">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" type="image/png" href="icons/icon-192.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <canvas id="cv"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="off">
+    <div id="topbar">
+      <div id="lvl">Level 1</div>
+      <div id="prog"><i id="progFill"></i></div>
+      <div id="coins">🪙 0</div>
+    </div>
+    <div id="weaponChip">🔫 Pistole</div>
+    <div id="count">10</div>
+    <div id="bossBox" class="hidden"><b id="bossName"></b><div id="bossBar"><i id="bossFill"></i></div></div>
+    <div id="floats"></div>
+    <div id="toast"></div>
+    <div id="hint">👆 Ziehen zum Steuern</div>
+  </div>
+
+  <!-- Menü -->
+  <section id="scrMenu" class="screen show">
+    <div class="logo">SCHWARM<span>STURM</span></div>
+    <div id="menuLevel">Level 1</div>
+    <button id="btnPlay" class="btn big">Los geht's!</button>
+    <div id="menuCoins">🪙 0</div>
+    <div id="shop"></div>
+    <div class="row">
+      <button class="toggle" data-set="music">🎵 Musik</button>
+      <button class="toggle" data-set="sfx">🔊 Sound</button>
+    </div>
+    <a class="link" href="../">🫧 Weitere Spiele</a>
+  </section>
+
+  <!-- Sieg -->
+  <section id="scrWin" class="screen">
+    <div class="panel">
+      <h2>Level geschafft! 🎉</h2>
+      <div class="big-num" id="winCoins">+0 🪙</div>
+      <p id="winInfo"></p>
+      <button id="btnDouble" class="btn">📺 Münzen verdoppeln</button>
+      <button id="btnNext" class="btn big">Weiter ▶</button>
+    </div>
+  </section>
+
+  <!-- Niederlage -->
+  <section id="scrLose" class="screen">
+    <div class="panel">
+      <h2>Truppe besiegt 💥</h2>
+      <p id="loseInfo"></p>
+      <button id="btnRevive" class="btn">💪 Weiterkämpfen <small id="reviveHint">+15 Kämpfer · 1× pro Level</small></button>
+      <button id="btnRetry" class="btn big">Nochmal ↻</button>
+      <button id="btnMenu" class="btn ghost">Menü</button>
+    </div>
+  </section>
+
+  <div id="lost">Grafik wird neu gestartet …</div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>
